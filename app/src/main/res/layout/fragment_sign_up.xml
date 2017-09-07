@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/FontSystemColor"
+    >
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:weightSum="1"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="16dp"
+        android:id="@+id/linear"
+        android:layout_alignParentTop="true"
+        android:visibility="gone"
+        android:background="@drawable/rounded_bg_relative"
+        android:layout_alignEnd="@+id/fab">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enter Your Photo:"
+            android:textSize="@dimen/text_size"
+            android:layout_weight="0.4"
+            android:textColor="@color/FontSystemColor"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:layout_marginLeft="5dp"
+            />
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageButtonTake"
+            android:src="@drawable/icon_take_photo"
+            android:scaleType="fitCenter"
+            android:layout_weight="0.3"
+
+            android:layout_margin="5dp"
+            android:background="@drawable/select_image_button"
+            />
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageButtonSelect"
+            android:src="@drawable/icon_picture_folder"
+            android:scaleType="fitCenter"
+            android:layout_weight="0.3"
+            android:layout_margin="5dp"
+            android:background="@drawable/select_image_button"
+            />
+
+    </LinearLayout>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/scroll"
+
+        android:layout_below="@+id/linear"
+        android:layout_alignParentStart="true">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="@dimen/activity_horizontal_margin"
+            android:background="@drawable/rounded_bg_relative">
+            <ImageView
+                android:id="@+id/imageReg"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:src="@mipmap/ic_logo"
+
+                android:layout_alignParentTop="true" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:layout_below="@+id/imageReg">
+
+                <android.support.v7.widget.AppCompatEditText
+                    android:id="@+id/editTextUserName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="2dp"
+                    android:layout_marginTop="5dp"
+                    android:hint="@string/reg_name"
+                    android:inputType="text|textAutoComplete"
+                    android:paddingLeft="5dp"
+                    android:selectAllOnFocus="true"
+                    android:singleLine="true"
+                    android:textColor="@color/FontSystemColor"
+                    android:textColorHint="@color/FontSystemColor" />
+
+                <android.support.v7.widget.AppCompatEditText
+                    android:id="@+id/editTextPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="2dp"
+                    android:hint="@string/reg_password"
+                    android:inputType="textPassword"
+                    android:paddingLeft="5dp"
+                    android:singleLine="true"
+                    android:textColor="@color/FontSystemColor"
+                    android:textColorHint="@color/FontSystemColor" />
+                <android.support.v7.widget.AppCompatEditText
+                    android:id="@+id/editTextRepassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="2dp"
+                    android:hint="@string/reg_repassword"
+                    android:inputType="textPassword"
+                    android:paddingLeft="5dp"
+                    android:singleLine="true"
+                    android:textColor="@color/FontSystemColor"
+                    android:textColorHint="@color/FontSystemColor" />
+                <android.support.v7.widget.AppCompatEditText
+                    android:id="@+id/editTextPhone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="2dp"
+                    android:layout_marginTop="5dp"
+                    android:hint="@string/reg_phone"
+                    android:inputType="phone"
+                    android:paddingLeft="5dp"
+                    android:selectAllOnFocus="true"
+
+                    android:singleLine="true"
+                    android:textColor="@color/FontSystemColor"
+                    android:textColorHint="@color/FontSystemColor" />
+
+                <android.support.v7.widget.AppCompatEditText
+                    android:id="@+id/editTextEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="2dp"
+                    android:hint="@string/reg_email"
+                    android:inputType="textEmailAddress"
+                    android:paddingLeft="5dp"
+                    android:selectAllOnFocus="true"
+                    android:singleLine="true"
+                    android:textColor="@color/FontSystemColor"
+                    android:textColorHint="@color/FontSystemColor" />
+            </LinearLayout>
+        </RelativeLayout>
+
+
+    </ScrollView>
+
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        app:backgroundTint="@color/ForeSystemColor"
+        app:srcCompat="@drawable/icon_plus_white"
+        app:fabSize="normal"
+        style="@style/Widget.Design.FloatingActionButton"
+        android:minHeight="150dp"
+        android:minWidth="200dp"
+        android:layout_marginLeft="@dimen/fab_margin"
+        android:layout_marginRight="@dimen/fab_margin"
+        android:layout_below="@+id/scroll"
+        android:layout_alignParentEnd="true" />
+
+
+</RelativeLayout>

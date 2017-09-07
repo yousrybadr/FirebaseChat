@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "384199432295",
+    "firebase_url": "https://fir-library-81a54.firebaseio.com",
+    "project_id": "fir-library-81a54",
+    "storage_bucket": "fir-library-81a54.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:384199432295:android:09b3f2d9808d47f6",
+        "android_client_info": {
+          "package_name": "com.pentavalue.yousry.firebasechat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "384199432295-7kg8ovn5o0r2tp2gp204kdkejg498oqt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pentavalue.yousry.firebasechat",
+            "certificate_hash": "25a27527ef0057cd962a761d7f82c55755b3a7f3"
+          }
+        },
+        {
+          "client_id": "384199432295-pk5vfuk024c811tc8bl2ltsuofe6nb8l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAmEuqjqJwyjoRRy1qDSu7PDfUL_IWZ9ZQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "384199432295-pk5vfuk024c811tc8bl2ltsuofe6nb8l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

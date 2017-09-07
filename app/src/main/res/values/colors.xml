@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#2196F3</color>
+    <color name="colorPrimaryDark">#1565C0</color>
+    <color name="colorAccent">#FFFFFF</color>
+
+
+
+    <color name="FontSystemColor">#2196F3</color>
+    <color name="ForeSystemColor">#1565C0</color>
+
+    <color name="darkColorDark">#6A6A6A</color>
+    <color name="greenColorLight">#0EEA0E</color>
+    <color name="greenColorDark">#35902C</color>
+    <color name="yellowColorLight">#F0ED0B</color>
+    <color name="yellowColorDark">#E1DE13</color>
+    <color name="redColorLight">#F0120B</color>
+    <color name="redColorDark">#B60000</color>
+    <color name="whiteColor">#ffffff</color>
+    <color name="blackColor">#000000</color>
+
+
+
+</resources>

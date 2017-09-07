@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="80dp"
+    android:layout_marginLeft="@dimen/margin_five"
+    android:layout_marginRight="@dimen/margin_five"
+    android:layout_marginBottom="@dimen/margin_ten"
+    android:layout_marginTop="@dimen/margin_ten"
+    >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:weightSum="1"
+        android:orientation="horizontal">
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/image"
+            android:padding="5dp"
+            android:src="@drawable/icon_chat"
+            android:layout_weight="0.8"
+            android:layout_margin="10dp"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.2">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:weightSum="1"
+                android:orientation="horizontal"
+                >
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:weightSum="1"
+                    android:layout_weight="0.4">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center|start"
+                        android:text="test"
+                        android:id="@+id/name"
+                        android:textSize="20sp"
+                        android:textColor="@color/blackColor"
+                        android:typeface="normal"
+                        android:textStyle="bold"
+                        android:layout_weight="0.4"/>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center|top|start"
+                        android:id="@+id/msg"
+                        android:textSize="15sp"
+                        android:maxLength="50"
+
+                        android:textColor="@color/darkColorDark"
+                        android:text="test"
+                        android:layout_weight="0.6"/>
+
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="test"
+                    android:textSize="10sp"
+                    android:id="@+id/date"
+                    android:textColor="@color/darkColorDark"
+                    android:layout_weight="0.6"/>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@color/FontSystemColor"
+                android:layout_alignParentBottom="true"/>
+        </RelativeLayout>
+
+    </LinearLayout>
+
+
+
+</RelativeLayout>
