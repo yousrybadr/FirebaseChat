@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_height="100dp"
+    android:layout_width="match_parent"
+    >
+    <LinearLayout
+
+        android:weightSum="1"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:clickable="true"
+        android:id="@+id/item_contact"
+        android:layout_height="110dp">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:layout_weight="0.8"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/image_contact"
+            android:layout_margin="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/icon_user"
+
+            app:civ_border_width="2dp"
+            app:civ_border_color="@color/FontSystemColor"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.2">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:weightSum="1"
+                android:layout_weight="0.5"
+                >
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/name_contact"
+                    android:layout_weight="0.5"
+                    android:text="Test"
+                    android:gravity="center|start|end"
+                    android:paddingStart="@dimen/margin_ten"
+                    android:paddingEnd="@dimen/margin_ten"
+                    android:textColor="@color/FontSystemColor"
+                    />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/phone_contact"
+                    android:layout_weight="0.5"
+                    android:text="Test"
+                    android:paddingStart="@dimen/margin_ten"
+                    android:paddingEnd="@dimen/margin_ten"
+                    android:gravity="center|start|end"
+                    android:textColor="@color/blackColor"/>
+            </LinearLayout>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/invite_button_contact"
+                android:layout_weight="0.7"
+                android:background="@drawable/select_button_shap"
+                android:layout_margin="20dp"
+                android:gravity="center"
+                android:visibility="visible"
+                android:text="@string/invite_button"
+                android:textColor="@color/text_blue_selector"/>
+
+        </LinearLayout>
+        </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="@dimen/margin_twenty"
+        android:layout_marginRight="@dimen/margin_twenty"
+        android:background="@android:color/darker_gray"/>
+</RelativeLayout>
