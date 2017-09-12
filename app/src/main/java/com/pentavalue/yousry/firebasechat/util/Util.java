@@ -32,6 +32,13 @@ public class Util {
     public static final String GROUPS_DATABASE_REFERENCE = "groups";
     public static final String MESSAGES_DATABASE_REFERENCE = "messages";
 
+    public static final String SHARED_PREFERENCE_KEY ="chat_app";
+    public static final String CURRENT_USER_EXTRA_KEY ="current_user";
+    public static final String ITEM_USER_EXTRA_KEY ="selected_user";
+
+
+
+
 
 
 

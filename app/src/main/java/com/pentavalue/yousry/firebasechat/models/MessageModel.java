@@ -8,47 +8,44 @@ import com.google.firebase.database.IgnoreExtraProperties;
 
 @IgnoreExtraProperties
 public class MessageModel {
-    private String sender;
-    private String receiver;
+
+    private String userId;
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
     private String text;
-    private String date;
+    private String timeStamp;
     private int isDeleted;
     private boolean isStarred;
 
     public MessageModel() {
+        userId="";
+        text ="";
+        timeStamp ="";
+        isDeleted =0;
+        isStarred =false;
     }
 
-    public MessageModel(String sender, String receiver, String text, String date) {
-        this.sender = sender;
-        this.receiver = receiver;
+    public MessageModel(String userId, String text, String timeStamp) {
+        this.userId= userId;
         this.text = text;
-        this.date = date;
+        this.timeStamp = timeStamp;
     }
 
-    public MessageModel(String sender, String receiver, String text, String date, int isDeleted, boolean isStarred) {
-        this.sender = sender;
-        this.receiver = receiver;
+    public MessageModel(String userId, String text, String timeStamp, int isDeleted, boolean isStarred) {
+        this.userId = userId;
         this.text = text;
-        this.date = date;
+        this.timeStamp = timeStamp;
         this.isDeleted = isDeleted;
         this.isStarred = isStarred;
     }
 
-    public String getSender() {
-        return sender;
-    }
-
-    public void setSender(String sender) {
-        this.sender = sender;
-    }
-
-    public String getReceiver() {
-        return receiver;
-    }
-
-    public void setReceiver(String receiver) {
-        this.receiver = receiver;
-    }
 
     public String getText() {
         return text;
@@ -58,12 +55,12 @@ public class MessageModel {
         this.text = text;
     }
 
-    public String getDate() {
-        return date;
+    public String getTimeStamp() {
+        return timeStamp;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public void setTimeStamp(String timeStamp) {
+        this.timeStamp = timeStamp;
     }
 
     public int getIsDeleted() {
@@ -85,10 +82,8 @@ public class MessageModel {
     @Override
     public String toString() {
         return "MessageModel{" +
-                "sender='" + sender + '\'' +
-                ", receiver='" + receiver + '\'' +
                 ", text='" + text + '\'' +
-                ", date='" + date + '\'' +
+                ", timeStamp='" + timeStamp + '\'' +
                 ", isDeleted=" + isDeleted +
                 ", isStarred=" + isStarred +
                 '}';

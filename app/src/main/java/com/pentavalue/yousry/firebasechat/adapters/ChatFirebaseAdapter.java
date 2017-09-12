@@ -1,4 +1,4 @@
-/*
+
 package com.pentavalue.yousry.firebasechat.adapters;
 
 import android.support.v7.widget.RecyclerView;
@@ -14,31 +14,42 @@ import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DatabaseReference;
 import com.pentavalue.yousry.firebasechat.R;
 import com.pentavalue.yousry.firebasechat.interfaces.ClickListenerChatFirebase;
+import com.pentavalue.yousry.firebasechat.models.MessageModel;
+import com.pentavalue.yousry.firebasechat.models.PrivateRoomChat;
+import com.pentavalue.yousry.firebasechat.util.CircleTransform;
 
 import hani.momanii.supernova_emoji_library.Helper.EmojiconTextView;
 
-*/
+
 /**
  * Created by Alessandro Barreto on 23/06/2016.
- *//*
+ */
 
-public class ChatFirebaseAdapter extends FirebaseRecyclerAdapter<ChatModel,ChatFirebaseAdapter.MyChatViewHolder> {
+public class ChatFirebaseAdapter extends FirebaseRecyclerAdapter<MessageModel,ChatFirebaseAdapter.MyChatViewHolder> {
 
     private static final int RIGHT_MSG = 0;
     private static final int LEFT_MSG = 1;
     private static final int RIGHT_MSG_IMG = 2;
     private static final int LEFT_MSG_IMG = 3;
 
-    private ClickListenerChatFirebase mClickListenerChatFirebase;
+   // private ClickListenerChatFirebase mClickListenerChatFirebase;
 
-    private String nameUser;
+    private String idUser;
+
+    private PrivateRoomChat roomChat;
 
 
 
-    public ChatFirebaseAdapter(DatabaseReference ref, String nameUser, ClickListenerChatFirebase mClickListenerChatFirebase) {
-        super(ChatModel.class, R.layout.item_message_left, ChatFirebaseAdapter.MyChatViewHolder.class, ref);
-        this.nameUser = nameUser;
-        this.mClickListenerChatFirebase = mClickListenerChatFirebase;
+
+
+    public ChatFirebaseAdapter(DatabaseReference ref, String idUser, PrivateRoomChat roomChat, ClickListenerChatFirebase mClickListenerChatFirebase) {
+        super(MessageModel.class, R.layout.item_message_left, ChatFirebaseAdapter.MyChatViewHolder.class, ref);
+
+
+
+        this.roomChat =roomChat;
+        this.idUser = idUser;
+        //this.mClickListenerChatFirebase = mClickListenerChatFirebase;
     }
 
     @Override
@@ -60,39 +71,24 @@ public class ChatFirebaseAdapter extends FirebaseRecyclerAdapter<ChatModel,ChatF
     }
 
     @Override
-    public int getItemViewType(int position) {
-        ChatModel model = getItem(position);
-        if (model.getMapModel() != null){
-            if (model.getUserModel().getName().equals(nameUser)){
-                return RIGHT_MSG_IMG;
-            }else{
-                return LEFT_MSG_IMG;
-            }
-        }else if (model.getFile() != null){
-            if (model.getFile().getType().equals("img") && model.getUserModel().getName().equals(nameUser)){
-                return RIGHT_MSG_IMG;
-            }else{
-                return LEFT_MSG_IMG;
-            }
-        }else if (model.getUserModel().getName().equals(nameUser)){
-            return RIGHT_MSG;
-        }else{
-            return LEFT_MSG;
-        }
+    protected void populateViewHolder(MyChatViewHolder viewHolder, MessageModel model, int position) {
+        if(model.getUserId().equals(roomChat.getFirst().getId()))
+            viewHolder.setIvUser(roomChat.getFirst().getImageUrl());
+        else
+            viewHolder.setIvUser(roomChat.getSecond().getImageUrl());
+        viewHolder.setTxtMessage(model.getText());
+        viewHolder.setTvTimestamp(model.getTimeStamp());
+
     }
 
     @Override
-    protected void populateViewHolder(MyChatViewHolder viewHolder, ChatModel model, int position) {
-        viewHolder.setIvUser(model.getUserModel().getPhoto_profile());
-        viewHolder.setTxtMessage(model.getMessage());
-        viewHolder.setTvTimestamp(model.getTimeStamp());
-        viewHolder.tvIsLocation(View.GONE);
-        if (model.getFile() != null){
-            viewHolder.tvIsLocation(View.GONE);
-            viewHolder.setIvChatPhoto(model.getFile().getUrl_file());
-        }else if(model.getMapModel() != null){
-            viewHolder.setIvChatPhoto(alessandro.firebaseandroid.util.Util.local(model.getMapModel().getLatitude(),model.getMapModel().getLongitude()));
-            viewHolder.tvIsLocation(View.VISIBLE);
+    public int getItemViewType(int position) {
+
+        MessageModel model = getItem(position);
+        if (model.getUserId().equals(idUser)){
+            return RIGHT_MSG;
+        }else{
+            return LEFT_MSG;
         }
     }
 
@@ -115,12 +111,12 @@ public class ChatFirebaseAdapter extends FirebaseRecyclerAdapter<ChatModel,ChatF
         @Override
         public void onClick(View view) {
             int position = getAdapterPosition();
-            ChatModel model = getItem(position);
-            if (model.getMapModel() != null){
-                mClickListenerChatFirebase.clickImageMapChat(view,position,model.getMapModel().getLatitude(),model.getMapModel().getLongitude());
+            MessageModel model = getItem(position);
+            /*if (model.getMapModel() != null){
+                //mClickListenerChatFirebase.clickImageMapChat(view,position,model.getMapModel().getLatitude(),model.getMapModel().getLongitude());
             }else{
-                mClickListenerChatFirebase.clickImageChat(view,position,model.getUserModel().getName(),model.getUserModel().getPhoto_profile(),model.getFile().getUrl_file());
-            }
+                //mClickListenerChatFirebase.clickImageChat(view,position,model.getUserModel().getName(),model.getUserModel().getImageUrl(),model.getFile().getUrl_file());
+            }*/
         }
 
         public void setTxtMessage(String message){
@@ -135,7 +131,7 @@ public class ChatFirebaseAdapter extends FirebaseRecyclerAdapter<ChatModel,ChatF
 
         public void setTvTimestamp(String timestamp){
             if (tvTimestamp == null)return;
-            tvTimestamp.setText(converteTimestamp(timestamp));
+            tvTimestamp.setText(convertTimestamp(timestamp));
         }
 
         public void setIvChatPhoto(String url){
@@ -154,9 +150,9 @@ public class ChatFirebaseAdapter extends FirebaseRecyclerAdapter<ChatModel,ChatF
 
     }
 
-    private CharSequence converteTimestamp(String mileSegundos){
-        return DateUtils.getRelativeTimeSpanString(Long.parseLong(mileSegundos),System.currentTimeMillis(), DateUtils.SECOND_IN_MILLIS);
+    private CharSequence convertTimestamp(String mSec){
+        return DateUtils.getRelativeTimeSpanString(Long.parseLong(mSec),System.currentTimeMillis(), DateUtils.SECOND_IN_MILLIS);
     }
 
 }
-*/
+

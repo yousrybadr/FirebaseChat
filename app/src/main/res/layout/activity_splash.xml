@@ -11,7 +11,7 @@
     android:background="@color/whiteColor"
 
 
-    tools:context="SplashActivity">
+    tools:context=".activities.SplashActivity">
 
     <ImageView
         android:layout_width="match_parent"

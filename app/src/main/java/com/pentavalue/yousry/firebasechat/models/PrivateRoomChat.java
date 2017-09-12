@@ -12,46 +12,58 @@ import java.util.List;
 // [START room_class]
 @IgnoreExtraProperties
 public class PrivateRoomChat {
-    private String first_user;
-    private String second_user;
+
+    private UserModel first;
+    private UserModel second;
+
+
     private String wallpaper_url;
     private List<MessageModel> messageModelList;
     private int isDelete;
     private boolean typing;
 
     public PrivateRoomChat() {
-        this.first_user = "";
-        this.second_user = "";
-        this.wallpaper_url = "";
-        this.messageModelList = new ArrayList<>();
-        this.isDelete =0;
+        this.first =new UserModel();
+        this.second =new UserModel();
+        this.messageModelList =new ArrayList<>();
         this.typing =false;
+        this.isDelete =0;
+
     }
 
-    public PrivateRoomChat(String first_user, String second_user, String wallpaper_url, List<MessageModel> messageModelList) {
-        this.first_user = first_user;
-        this.second_user = second_user;
+    public PrivateRoomChat(UserModel first, UserModel second, List<MessageModel> messageModelList) {
+        this.first = first;
+        this.second = second;
+        this.messageModelList = messageModelList;
+        this.typing =false;
+        this.isDelete =0;
+    }
+
+    public PrivateRoomChat(UserModel first_user, UserModel second_user, String wallpaper_url, List<MessageModel> messageModelList) {
+        this.first = first_user;
+        this.second = second_user;
         this.wallpaper_url = wallpaper_url;
         this.messageModelList = messageModelList;
         this.isDelete =0;
         this.typing =false;
     }
 
-    public String getFirst_user() {
-        return first_user;
+    public UserModel getFirst() {
+        return first;
     }
 
-    public void setFirst_user(String first_user) {
-        this.first_user = first_user;
+    public void setFirst(UserModel first) {
+        this.first = first;
     }
 
-    public String getSecond_user() {
-        return second_user;
+    public UserModel getSecond() {
+        return second;
     }
 
-    public void setSecond_user(String second_user) {
-        this.second_user = second_user;
+    public void setSecond(UserModel second) {
+        this.second = second;
     }
+
 
     public String getWallpaper_url() {
         return wallpaper_url;
@@ -93,13 +105,13 @@ public class PrivateRoomChat {
     }
 
 
-
     @Override
     public String toString() {
         return "PrivateRoomChat{" +
-                "first_user='" + first_user + '\'' +
-                ", second_user='" + second_user + '\'' +
+                "first='" + first.toString() + '\'' +
+                ", second='" + second.toString() + '\'' +
                 ", wallpaper_url='" + wallpaper_url + '\'' +
+                ", messageModelList=" + messageModelList +
                 ", isDelete=" + isDelete +
                 ", typing=" + typing +
                 '}';

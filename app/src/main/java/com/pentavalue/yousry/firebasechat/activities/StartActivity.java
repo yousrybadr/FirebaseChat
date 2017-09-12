@@ -1,4 +1,4 @@
-package com.pentavalue.yousry.firebasechat;
+package com.pentavalue.yousry.firebasechat.activities;
 
 import android.content.Intent;
 import android.support.annotation.Nullable;
@@ -7,25 +7,13 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.pentavalue.yousry.firebasechat.R;
 import com.pentavalue.yousry.firebasechat.fragments.LoginFragment;
 import com.pentavalue.yousry.firebasechat.fragments.SignUpFragment;
-import com.pentavalue.yousry.firebasechat.models.UserModel;
 import com.pentavalue.yousry.firebasechat.util.Logs;
-import com.pentavalue.yousry.firebasechat.util.Util;
-import com.pentavalue.yousry.firebasechat.views.LoadingDialog;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -48,7 +36,6 @@ public class StartActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-
     }
 
     @Override

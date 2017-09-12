@@ -29,7 +29,7 @@ public class ContactViewHolder extends RecyclerView.ViewHolder {
     private TextView phone;
     private CircleImageView photo;
     private Button inviteButton;
-    private LinearLayout item_contact;
+    public LinearLayout item_contact;
     private Contact contact;
 
 
@@ -48,10 +48,12 @@ public class ContactViewHolder extends RecyclerView.ViewHolder {
         inviteButton =view.findViewById(R.id.invite_button_contact);
 
 
+        inviteButton.setVisibility(View.GONE);
         name.setText(contact.getContact_name());
         phone.setText(contact.getPhone_number());
 
     }
+
 
 
     public Contact getContact() {

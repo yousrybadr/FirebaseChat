@@ -1,14 +1,18 @@
 package com.pentavalue.yousry.firebasechat.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.pentavalue.yousry.firebasechat.R;
+import com.pentavalue.yousry.firebasechat.activities.ChatActivity;
 import com.pentavalue.yousry.firebasechat.holders.ContactViewHolder;
 import com.pentavalue.yousry.firebasechat.models.Contact;
+import com.pentavalue.yousry.firebasechat.models.UserModel;
+import com.pentavalue.yousry.firebasechat.util.Util;
 
 import java.util.List;
 
@@ -16,13 +20,15 @@ import java.util.List;
  * Created by yousry on 9/10/2017.
  */
 
-public class ContactAdapter extends RecyclerView.Adapter<ContactViewHolder> {
+public class ContactAdapter extends RecyclerView.Adapter<ContactViewHolder>  {
     ContactViewHolder holder;
     List<Contact> contacts;
+    List<UserModel> users;
     Context context;
 
-    public ContactAdapter(List<Contact> contacts, Context context) {
+    public ContactAdapter(List<Contact> contacts, List<UserModel> users, Context context) {
         this.contacts = contacts;
+        this.users =users;
         this.context = context;
     }
 
@@ -30,6 +36,10 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactViewHolder> {
         this.context = context;
     }
 
+
+    public void setUsers(List<UserModel> users) {
+        this.users = users;
+    }
 
     public void setContacts(List<Contact> contacts) {
         this.contacts = contacts;
@@ -43,12 +53,20 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(ContactViewHolder holder, int position) {
+    public void onBindViewHolder(ContactViewHolder holder, final int position) {
         holder.bind(contacts.get(position),context);
+        holder.item_contact.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent=new Intent(context, ChatActivity.class);
+                intent.putExtra(Util.ITEM_USER_EXTRA_KEY,users.get(position));
+                context.startActivity(intent);
+            }
+        });
     }
 
     @Override
     public int getItemCount() {
-        return contacts.size();
+        return users.size();
     }
 }

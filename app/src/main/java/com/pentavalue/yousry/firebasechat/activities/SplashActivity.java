@@ -1,4 +1,4 @@
-package com.pentavalue.yousry.firebasechat;
+package com.pentavalue.yousry.firebasechat.activities;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -12,7 +12,15 @@ import android.view.animation.AnimationUtils;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
+import com.pentavalue.yousry.firebasechat.R;
 import com.pentavalue.yousry.firebasechat.models.CurrentUser;
+import com.pentavalue.yousry.firebasechat.models.UserModel;
+import com.pentavalue.yousry.firebasechat.util.DatabaseRefs;
+import com.pentavalue.yousry.firebasechat.util.Util;
 
 public class SplashActivity extends AppCompatActivity {
     private static final boolean AUTO_HIDE = true;
@@ -21,6 +29,7 @@ public class SplashActivity extends AppCompatActivity {
      * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
      * user interaction before hiding the system UI.
      */
+    UserModel[] model = {new UserModel()};
 
 
     /**
@@ -78,6 +87,7 @@ public class SplashActivity extends AppCompatActivity {
             public void onAnimationStart(Animation animation) {
 
 
+
                 //Intent myIntent=new Intent(SplashActivity.this,MyService.class);
                 //startService(myIntent);
                // startService(intent);
@@ -95,14 +105,30 @@ public class SplashActivity extends AppCompatActivity {
             @Override
             public void onAnimationEnd(Animation animation) {
                 mContentView.startAnimation(an2);
+
                 FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
                 if(firebaseUser !=null){
-                    if(CurrentUser.getInstance().getUserModel() == null || !CurrentUser.getInstance().isChecked){
-                        FirebaseAuth.getInstance().signOut();
-                        startActivity(new Intent(SplashActivity.this,StartActivity.class));
-                    }else {
-                        startActivity(new Intent(SplashActivity.this,HomeActivity.class));
-                    }
+
+                    DatabaseReference userRef = DatabaseRefs.mUsersDatabaseReference.child(firebaseUser.getUid());
+
+                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            //CurrentUser.getInstance().setUserModel(dataSnapshot.getValue(UserModel.class));
+                            //CurrentUser.getInstance().setUserModel(modal);
+                            model[0] =dataSnapshot.getValue(UserModel.class);
+                            CurrentUser.setOurInstance(model[0]);
+                            //Logs.LogV(TAG,"Login :" + modal.toString());
+
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            //Toast.makeText(getContext(),databaseError.getMessage(),Toast.LENGTH_LONG).show();
+                        }
+                    });
+                    startActivity(new Intent(SplashActivity.this,HomeActivity.class).putExtra(Util.CURRENT_USER_EXTRA_KEY,model[0]));
+
                 }else {
                     startActivity(new Intent(SplashActivity.this,StartActivity.class));
                 }
