@@ -30,6 +30,7 @@
     <string name="reg_repassword">Repassword</string>
     <string name="login_start">Sign In</string>
     <string name="registration_start">Sign Up</string>
+    <string name="invite_button">invite</string>
 
 
 </resources>

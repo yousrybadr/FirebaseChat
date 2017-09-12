@@ -9,6 +9,7 @@
 
     <dimen name="margin_five">5dp</dimen>
     <dimen name="margin_ten">10dp</dimen>
+    <dimen name="margin_twenty">20dp</dimen>
     <dimen name="text_size">17sp</dimen>
     <dimen name="text_message">15sp</dimen>
     <dimen name="text_splash">30sp</dimen>

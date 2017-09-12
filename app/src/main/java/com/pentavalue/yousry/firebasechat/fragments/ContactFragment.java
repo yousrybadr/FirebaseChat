@@ -2,108 +2,164 @@ package com.pentavalue.yousry.firebasechat.fragments;
 
 import android.content.Context;
 import android.net.Uri;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.pentavalue.yousry.firebasechat.R;
+import com.pentavalue.yousry.firebasechat.adapters.ContactAdapter;
+import com.pentavalue.yousry.firebasechat.models.Contact;
+import com.pentavalue.yousry.firebasechat.models.UserModel;
+import com.pentavalue.yousry.firebasechat.util.DatabaseRefs;
+import com.pentavalue.yousry.firebasechat.util.Util;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link ContactFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link ContactFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
+
 public class ContactFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    public static final String TAG = ContactFragment.class.getSimpleName();
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private List<Contact> contactList;
 
-    private OnFragmentInteractionListener mListener;
+    @BindView(R.id.swipeContainer)
+    SwipeRefreshLayout refreshLayout;
+    @BindView(R.id.recycler_view)
+    RecyclerView recyclerView;
 
+
+    Unbinder unbinder ;
+
+    DatabaseReference reference = DatabaseRefs.mUsersDatabaseReference;
+
+
+    ContactAdapter contactAdapter;
     public ContactFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ContactFragment.
-     */
     // TODO: Rename and change types and number of parameters
-    public static ContactFragment newInstance(String param1, String param2) {
+    public static ContactFragment newInstance() {
         ContactFragment fragment = new ContactFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        contactList=new ArrayList<>();
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        View view =inflater.inflate(R.layout.fragment_contacts, container, false);
+        unbinder = ButterKnife.bind(this,view);
+        contactList =Util.ReadAllContacts(getContext());
+        contactAdapter =new ContactAdapter(contactList,getContext());
+        LinearLayoutManager llm = new LinearLayoutManager(getContext());
+        llm.setOrientation(LinearLayoutManager.VERTICAL);
+        recyclerView.setAdapter(contactAdapter);
+        recyclerView.setLayoutManager(llm);
+
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                // Your code to refresh the list here.
+                // Make sure you call swipeContainer.setRefreshing(false)
+                // once the network request has completed successfully.
+
+                ReloadAllContacts();
+            }
+        });
+        // Configure the refreshing colors
+        refreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+
+
+
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_contacts, container, false);
+        return view;
     }
+
+    private void ReloadAllContacts() {
+
+        for (int i=0;i< contactList.size();i++){
+            final Contact contact=contactList.get(i);
+            DatabaseReference mFirebaseDatabaseReference = DatabaseRefs.mRootDatabaseReference;
+            Query query = mFirebaseDatabaseReference.child("users").orderByChild("phone").equalTo(contact.getPhone_number());
+
+            final int finalI = i;
+            ValueEventListener phoneListner =new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    UserModel userModel =dataSnapshot.getValue(UserModel.class);
+                    contact.setMessengerContact(true);
+                    contact.setUserId(userModel.getId());
+                    contact.setEmail(userModel.getEmail());
+                    contactList.set(finalI,contact);
+                    Log.v(TAG,"Reloading Start\nUser is" +dataSnapshot.toString());
+                    refreshLayout.setRefreshing(false);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.e(TAG,"Error : "+databaseError.getMessage());
+                    refreshLayout.setRefreshing(false);
+
+                }
+            };
+            query.addValueEventListener(phoneListner);
+        }
+
+        contactAdapter =new ContactAdapter(contactList,getContext());
+        //adapter.clear();
+        //adapter.addAll(result.data);
+        recyclerView.setAdapter(contactAdapter);
+    }
+
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
+
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
+
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
-    }
+
 }

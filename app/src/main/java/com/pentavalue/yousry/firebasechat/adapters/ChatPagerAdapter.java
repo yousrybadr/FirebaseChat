@@ -5,6 +5,9 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
 import com.pentavalue.yousry.firebasechat.fragments.ChatListFragment;
+import com.pentavalue.yousry.firebasechat.fragments.ContactFragment;
+import com.pentavalue.yousry.firebasechat.fragments.GroupFragment;
+import com.pentavalue.yousry.firebasechat.models.Contact;
 
 /**
  * Created by yousry on 9/5/2017.
@@ -13,7 +16,7 @@ import com.pentavalue.yousry.firebasechat.fragments.ChatListFragment;
 public class ChatPagerAdapter extends FragmentPagerAdapter {
 
     final int PAGE_COUNT = 3;
-    private String tabTitles[] = new String[] { "Tab1", "Tab2", "Tab3" };
+    private String tabTitles[] = new String[] { "Chat", "Groups", "Contacts" };
 
     public ChatPagerAdapter(FragmentManager fm) {
         super(fm);
@@ -21,7 +24,7 @@ public class ChatPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        return ChatListFragment.newInstance(position +1);
+        return ContactFragment.newInstance();
     }
 
     @Override

@@ -124,7 +124,11 @@ public class LoginFragment extends Fragment {
 
     private void signIn(String email, String password) {
         Log.d(TAG, "signIn:" + email);
+        final LoadingDialog loadingDialog =new LoadingDialog(getContext());
+        loadingDialog.showProgressDialog("Login","Loading...",false);
+
         if (!Validation.isValidLogin(email,password)) {
+            loadingDialog.hideProgressDialog();
             return;
         }
 
@@ -137,12 +141,14 @@ public class LoginFragment extends Fragment {
                         Logs.LogV(TAG, "Success :" + authResult.getUser().getEmail());
                         setUserModel(authResult.getUser());
                         startActivity(new Intent(getActivity(), HomeActivity.class));
+                        loadingDialog.hideProgressDialog();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Logs.LogE(TAG,e.getMessage());
+                        loadingDialog.hideProgressDialog();
                     }
                 });
         // [END sign_in_with_email]
