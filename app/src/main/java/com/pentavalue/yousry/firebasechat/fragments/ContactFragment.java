@@ -109,11 +109,11 @@ public class ContactFragment extends Fragment {
     }
 
     private void ReloadAllContacts() {
-
-        for (int i=0;i< contactList.size();i++){
+        DatabaseReference mFirebaseDatabaseReference = DatabaseRefs.mRootDatabaseReference;
+        Query query = mFirebaseDatabaseReference.child("users").orderByChild("phone");
+        for (int i=0;i< 10;i++){
             final Contact contact=contactList.get(i);
-            DatabaseReference mFirebaseDatabaseReference = DatabaseRefs.mRootDatabaseReference;
-            Query query = mFirebaseDatabaseReference.child("users").orderByChild("phone").equalTo(contact.getPhone_number());
+            query =query.equalTo(contact.getPhone_number());
 
             final int finalI = i;
             ValueEventListener phoneListner =new ValueEventListener() {
