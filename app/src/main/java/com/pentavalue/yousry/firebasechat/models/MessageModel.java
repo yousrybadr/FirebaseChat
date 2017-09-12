@@ -8,8 +8,8 @@ import com.google.firebase.database.IgnoreExtraProperties;
 
 @IgnoreExtraProperties
 public class MessageModel {
-    private String first_user;
-    private String second_user;
+    private String sender;
+    private String receiver;
     private String text;
     private String date;
     private int isDeleted;
@@ -18,36 +18,36 @@ public class MessageModel {
     public MessageModel() {
     }
 
-    public MessageModel(String first_user, String second_user, String text, String date) {
-        this.first_user = first_user;
-        this.second_user = second_user;
+    public MessageModel(String sender, String receiver, String text, String date) {
+        this.sender = sender;
+        this.receiver = receiver;
         this.text = text;
         this.date = date;
     }
 
-    public MessageModel(String first_user, String second_user, String text, String date, int isDeleted, boolean isStarred) {
-        this.first_user = first_user;
-        this.second_user = second_user;
+    public MessageModel(String sender, String receiver, String text, String date, int isDeleted, boolean isStarred) {
+        this.sender = sender;
+        this.receiver = receiver;
         this.text = text;
         this.date = date;
         this.isDeleted = isDeleted;
         this.isStarred = isStarred;
     }
 
-    public String getFirst_user() {
-        return first_user;
+    public String getSender() {
+        return sender;
     }
 
-    public void setFirst_user(String first_user) {
-        this.first_user = first_user;
+    public void setSender(String sender) {
+        this.sender = sender;
     }
 
-    public String getSecond_user() {
-        return second_user;
+    public String getReceiver() {
+        return receiver;
     }
 
-    public void setSecond_user(String second_user) {
-        this.second_user = second_user;
+    public void setReceiver(String receiver) {
+        this.receiver = receiver;
     }
 
     public String getText() {
@@ -85,8 +85,8 @@ public class MessageModel {
     @Override
     public String toString() {
         return "MessageModel{" +
-                "first_user='" + first_user + '\'' +
-                ", second_user='" + second_user + '\'' +
+                "sender='" + sender + '\'' +
+                ", receiver='" + receiver + '\'' +
                 ", text='" + text + '\'' +
                 ", date='" + date + '\'' +
                 ", isDeleted=" + isDeleted +
