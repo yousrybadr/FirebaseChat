@@ -28,8 +28,7 @@ public class Util {
     //Database Constants
     public static final String ROOT_DATABASE_REFERENCE = "chat_app";
     public static final String USERS_DATABASE_REFERENCE = "users";
-    public static final String ROOMS_DATABASE_REFERENCE = "rooms";
-    public static final String GROUPS_DATABASE_REFERENCE = "groups";
+    public static final String CHAT_DATABASE_REFERENCE = "chats";
     public static final String MESSAGES_DATABASE_REFERENCE = "messages";
 
     public static final String SHARED_PREFERENCE_KEY ="chat_app";

@@ -21,6 +21,6 @@ public class Helper {
 
 
     public void setUserModel(final FirebaseUser user){
-
+        ;
     }
 }

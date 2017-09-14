@@ -16,6 +16,7 @@ import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -28,6 +29,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.pentavalue.yousry.firebasechat.R;
 import com.pentavalue.yousry.firebasechat.adapters.ChatFirebaseAdapter;
 import com.pentavalue.yousry.firebasechat.interfaces.ClickListenerChatFirebase;
+import com.pentavalue.yousry.firebasechat.models.Chat;
 import com.pentavalue.yousry.firebasechat.models.CurrentUser;
 import com.pentavalue.yousry.firebasechat.models.MessageModel;
 import com.pentavalue.yousry.firebasechat.models.PrivateRoomChat;
@@ -83,8 +85,14 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
+        Chat chat=new Chat();
 
-        mCurrentUser = CurrentUser.getInstance().getUserModel();
+
+        FirebaseDatabase.getInstance().getReference().child(Util.ROOT_DATABASE_REFERENCE)
+                .child(Util.CHAT_DATABASE_REFERENCE).push().setValue(chat);
+
+
+       /* mCurrentUser = CurrentUser.getInstance().getUserModel();
 
         mSecondUser = (UserModel) getIntent().getSerializableExtra(Util.ITEM_USER_EXTRA_KEY);
         roomChat =new PrivateRoomChat(mCurrentUser,mSecondUser,loadMessages());
@@ -101,27 +109,9 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
                     .enableAutoManage(this, this)
                     .addApi(Auth.GOOGLE_SIGN_IN_API)
                     .build();
-        }
+        }*/
     }
 
-    private void bindViews(){
-        contentRoot = findViewById(R.id.contentRoot);
-        edMessage = (EmojiconEditText)findViewById(R.id.editTextMessage);
-        btSendMessage = (ImageView)findViewById(R.id.buttonMessage);
-        btSendMessage.setOnClickListener(this);
-        btEmoji = (ImageView)findViewById(R.id.buttonEmoji);
-        emojIcon = new EmojIconActions(this,contentRoot,edMessage,btEmoji);
-        emojIcon.ShowEmojIcon();
-        rvListMessage = (RecyclerView)findViewById(R.id.messageRecyclerView);
-        mLinearLayoutManager = new LinearLayoutManager(this);
-        mLinearLayoutManager.setStackFromEnd(true);
-    }
-    private void signOut(){
-        mFirebaseAuth.signOut();
-        Auth.GoogleSignInApi.signOut(mGoogleApiClient);
-        startActivity(new Intent(this, StartActivity.class));
-        finish();
-    }
    /* public void verifyStoragePermissions() {
         // Check if we have write permission
         int permission = ActivityCompat.checkSelfPermission(ChatActivity.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
@@ -164,8 +154,21 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
      * Enviar msg de texto simples para chat
      */
     private void sendMessageFirebase(){
-        //PrivateChatModel model = new PrivateChatModel(userModel,edMessage.getText().toString(), Calendar.getInstance().getTime().getTime()+"",null);
-       // mFirebaseDatabaseReference.child(CHAT_REFERENCE).push().setValue(model);
+        MessageModel model = new MessageModel(CurrentUser.getInstance().getUserModel().getId(),edMessage.getText().toString(), Calendar.getInstance().getTime().getTime()+"");
+        mFirebaseDatabaseReference =DatabaseRefs.mRoomsDatabaseReference.child(CHAT_REFERENCE);
+        mFirebaseDatabaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String key =dataSnapshot.getValue(String.class);
+                Log.v(TAG,"Key is "+key);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
         edMessage.setText(null);
     }
 
@@ -180,6 +183,8 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
             loadMessagesFirebase();
         }
     }
+
+
 
     private void loadMessagesFirebase(){
         mFirebaseDatabaseReference = DatabaseRefs.mRoomsDatabaseReference;
@@ -210,11 +215,12 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
 
 
 
-        /*final ChatFirebaseAdapter firebaseAdapter = new ChatFirebaseAdapter(mFirebaseDatabaseReference.child(CHAT_REFERENCE),
+        final ChatFirebaseAdapter firebaseAdapter = new ChatFirebaseAdapter(mFirebaseDatabaseReference.child(CHAT_REFERENCE),
                 mCurrentUser.getId(),
                 roomChat,
-                this);*/
-        /*firebaseAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+                loadMessages(),
+                this);
+        firebaseAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
             public void onItemRangeInserted(int positionStart, int itemCount) {
                 super.onItemRangeInserted(positionStart, itemCount);
@@ -226,7 +232,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
                     rvListMessage.scrollToPosition(positionStart);
                 }
             }
-        });*/
+        });
         rvListMessage.setLayoutManager(mLinearLayoutManager);
         //rvListMessage.setAdapter(firebaseAdapter);
         //swipeContainer.setRefreshing(false);
@@ -239,9 +245,34 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
 
     }
 
+    private void bindViews(){
+        contentRoot = findViewById(R.id.contentRoot);
+        edMessage = (EmojiconEditText)findViewById(R.id.editTextMessage);
+        btSendMessage = (ImageView)findViewById(R.id.buttonMessage);
+        btSendMessage.setOnClickListener(this);
+        btEmoji = (ImageView)findViewById(R.id.buttonEmoji);
+        emojIcon = new EmojIconActions(this,contentRoot,edMessage,btEmoji);
+        emojIcon.ShowEmojIcon();
+        rvListMessage = (RecyclerView)findViewById(R.id.messageRecyclerView);
+        mLinearLayoutManager = new LinearLayoutManager(this);
+        mLinearLayoutManager.setStackFromEnd(true);
+    }
+    private void signOut(){
+        mFirebaseAuth.signOut();
+        Auth.GoogleSignInApi.signOut(mGoogleApiClient);
+        startActivity(new Intent(this, StartActivity.class));
+        finish();
+    }
     @Override
     public void onClick(View view) {
-
+        int id =view.getId();
+        switch (id){
+            case R.id.buttonMessage:
+                sendMessageFirebase();
+                break;
+            default:
+                break;
+        }
     }
 
     @Override

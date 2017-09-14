@@ -23,12 +23,10 @@ import java.util.List;
 public class ContactAdapter extends RecyclerView.Adapter<ContactViewHolder>  {
     ContactViewHolder holder;
     List<Contact> contacts;
-    List<UserModel> users;
     Context context;
 
-    public ContactAdapter(List<Contact> contacts, List<UserModel> users, Context context) {
+    public ContactAdapter(List<Contact> contacts, Context context) {
         this.contacts = contacts;
-        this.users =users;
         this.context = context;
     }
 
@@ -37,9 +35,6 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactViewHolder>  {
     }
 
 
-    public void setUsers(List<UserModel> users) {
-        this.users = users;
-    }
 
     public void setContacts(List<Contact> contacts) {
         this.contacts = contacts;
@@ -55,18 +50,18 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactViewHolder>  {
     @Override
     public void onBindViewHolder(ContactViewHolder holder, final int position) {
         holder.bind(contacts.get(position),context);
-        holder.item_contact.setOnClickListener(new View.OnClickListener() {
+       /* holder.item_chat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent=new Intent(context, ChatActivity.class);
                 intent.putExtra(Util.ITEM_USER_EXTRA_KEY,users.get(position));
                 context.startActivity(intent);
             }
-        });
+        });*/
     }
 
     @Override
     public int getItemCount() {
-        return users.size();
+        return contacts.size();
     }
 }

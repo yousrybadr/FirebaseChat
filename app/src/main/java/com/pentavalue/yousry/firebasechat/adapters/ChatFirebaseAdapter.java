@@ -18,6 +18,8 @@ import com.pentavalue.yousry.firebasechat.models.MessageModel;
 import com.pentavalue.yousry.firebasechat.models.PrivateRoomChat;
 import com.pentavalue.yousry.firebasechat.util.CircleTransform;
 
+import java.util.List;
+
 import hani.momanii.supernova_emoji_library.Helper.EmojiconTextView;
 
 
@@ -27,6 +29,7 @@ import hani.momanii.supernova_emoji_library.Helper.EmojiconTextView;
 
 public class ChatFirebaseAdapter extends FirebaseRecyclerAdapter<MessageModel,ChatFirebaseAdapter.MyChatViewHolder> {
 
+    List<MessageModel> modelList;
     private static final int RIGHT_MSG = 0;
     private static final int LEFT_MSG = 1;
     private static final int RIGHT_MSG_IMG = 2;
@@ -42,9 +45,10 @@ public class ChatFirebaseAdapter extends FirebaseRecyclerAdapter<MessageModel,Ch
 
 
 
-    public ChatFirebaseAdapter(DatabaseReference ref, String idUser, PrivateRoomChat roomChat, ClickListenerChatFirebase mClickListenerChatFirebase) {
+    public ChatFirebaseAdapter(DatabaseReference ref, String idUser, PrivateRoomChat roomChat, List<MessageModel> list,ClickListenerChatFirebase mClickListenerChatFirebase) {
         super(MessageModel.class, R.layout.item_message_left, ChatFirebaseAdapter.MyChatViewHolder.class, ref);
 
+        this.modelList =list;
 
 
         this.roomChat =roomChat;
@@ -76,21 +80,27 @@ public class ChatFirebaseAdapter extends FirebaseRecyclerAdapter<MessageModel,Ch
             viewHolder.setIvUser(roomChat.getFirst().getImageUrl());
         else
             viewHolder.setIvUser(roomChat.getSecond().getImageUrl());
-        viewHolder.setTxtMessage(model.getText());
-        viewHolder.setTvTimestamp(model.getTimeStamp());
+
+
+        viewHolder.setTxtMessage(modelList.get(position).getText());
+        viewHolder.setTvTimestamp(modelList.get(position).getTimeStamp());
+
+
 
     }
 
     @Override
     public int getItemViewType(int position) {
 
-        MessageModel model = getItem(position);
-        if (model.getUserId().equals(idUser)){
+        //MessageModel model = getItem(position);
+        if (modelList.get(position).getUserId().equals(idUser)){
             return RIGHT_MSG;
         }else{
             return LEFT_MSG;
         }
     }
+
+
 
 
     public class MyChatViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

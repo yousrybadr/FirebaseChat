@@ -14,7 +14,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -31,6 +33,8 @@ import com.pentavalue.yousry.firebasechat.util.DatabaseRefs;
 import com.pentavalue.yousry.firebasechat.util.Util;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -43,13 +47,13 @@ public class ContactFragment extends Fragment {
 
     private List<Contact> contactList;
 
-    private List<UserModel> userModels;
     @BindView(R.id.swipeContainer)
     SwipeRefreshLayout refreshLayout;
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
 
 
+    List<UserModel> userModels;
     Unbinder unbinder ;
 
     DatabaseReference reference = DatabaseRefs.mUsersDatabaseReference;
@@ -84,26 +88,90 @@ public class ContactFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view =inflater.inflate(R.layout.fragment_contacts, container, false);
         unbinder = ButterKnife.bind(this,view);
+
+
+
+        Log.v(TAG,"Start Fragment : "+TAG);
         //contactList =Util.ReadAllContacts(getContext());
         //contactAdapter =new ContactAdapter(contactList,getContext());
         LinearLayoutManager llm = new LinearLayoutManager(getContext());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
-        contactList=new ArrayList<>();
-        userModels =new ArrayList<>();
+        contactList=Util.ReadAllContacts(getContext());
+        //contactAdapter =new ContactAdapter(contactList,getContext());
         //recyclerView.setAdapter(contactAdapter);
         recyclerView.setLayoutManager(llm);
-        ReloadAllContacts();
+        //ReloadAllContacts();
+        if(!Util.verifyNetworkConnection(getContext())){
+            Toast.makeText(getContext(),getResources().getString(R.string.no_internet_connection),Toast.LENGTH_SHORT).show();
+            contactList=Util.ReadAllContacts(getContext());
+            contactAdapter =new ContactAdapter(contactList,getContext());
+            recyclerView.setAdapter(contactAdapter);
+            recyclerView.setLayoutManager(llm);
+        }else{
+            userModels =new ArrayList<>();
+            DatabaseReference ref = DatabaseRefs.mUsersDatabaseReference;
+            ref.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for (DataSnapshot snapshot: dataSnapshot.getChildren()){
+                        UserModel userModel=snapshot.getValue(UserModel.class);
+                        Log.v(TAG,"userModel is :"+userModel.toString());
+                        for(int i=0 ;i<contactList.size();i++){
+                            Log.v(TAG,"contactModel is :"+contactList.get(i).toString());
+
+                            if(contactList.get(i).getPhone_number().equals(userModel.getPhone())){
+                                contactList.get(i).setMessengerContact(true);
+                                Log.v(TAG,contactList.get(i).getPhone_number());
+                            }
+                        }
+
+                        Log.v(TAG,userModel.toString());
+                        //refreshLayout.setRefreshing(false);
+
+
+                    }
+
+                    Collections.sort(contactList, new Comparator<Contact>() {
+                        @Override
+                        public int compare(Contact contact, Contact t1) {
+                            boolean b1 = contact.isMessengerContact();
+                            boolean b2 = t1.isMessengerContact();
+                            if (b1 == !b2){
+                                return 1;
+                            }
+                            if (!b1 == b2){
+                                return -1;
+                            }
+                            return 0;
+                        }
+                    });
+                    contactAdapter = new ContactAdapter(contactList, getContext());
+                    recyclerView.setAdapter(contactAdapter);
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Toast.makeText(getContext(),databaseError.getMessage(),Toast.LENGTH_LONG).show();
+                }
+            });
+        }
 
 
 
-       /* refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+
+       refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 // Your code to refresh the list here.
                 // Make sure you call swipeContainer.setRefreshing(false)
                 // once the network request has completed successfully.
 
-                ReloadAllContacts();
+                if(!Util.verifyNetworkConnection(getContext())){
+                    Toast.makeText(getContext(),getResources().getString(R.string.no_internet_connection),Toast.LENGTH_SHORT).show();
+                    refreshLayout.setRefreshing(false);
+                }else
+                    ReloadAllContacts();
             }
         });
         // Configure the refreshing colors
@@ -111,7 +179,7 @@ public class ContactFragment extends Fragment {
                 android.R.color.holo_green_light,
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
-*/
+
 
 
         // Inflate the layout for this fragment
@@ -120,39 +188,46 @@ public class ContactFragment extends Fragment {
 
     private void ReloadAllContacts() {
         DatabaseReference mFirebaseDatabaseReference = DatabaseRefs.mUsersDatabaseReference;
-        Query query = mFirebaseDatabaseReference;
-
-        //contactList =Util.ReadAllContacts(getContext());
-        contactList.clear();
-        Log.v(TAG,"Contacts Size is :"+contactList.size());
-
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
+        mFirebaseDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 for (DataSnapshot snapshot: dataSnapshot.getChildren()){
                     UserModel userModel=snapshot.getValue(UserModel.class);
+                    Log.v(TAG,"userModel is :"+userModel.toString());
+                    for(int i=0 ;i<contactList.size();i++){
+                        Log.v(TAG,"contactModel is :"+contactList.get(i).toString());
 
-                    if(userModel.getId().equals(CurrentUser.getInstance().getUserModel().getId())){
-                        continue;
+
+                        if(contactList.get(i).getPhone_number().equals(userModel.getPhone())){
+                            contactList.get(i).setMessengerContact(true);
+                        }
                     }
-                    Contact contact =new Contact();
-                    contact.setContact_name(userModel.getName());
-                    contact.setEmail(userModel.getEmail());
-                    contact.setMessengerContact(true);
-                    contact.setPhone_number(userModel.getPhone());
 
+
+                    Collections.sort(contactList, new Comparator<Contact>() {
+                        @Override
+                        public int compare(Contact contact, Contact t1) {
+                            boolean b1 = contact.isMessengerContact();
+                            boolean b2 = t1.isMessengerContact();
+                            if (b1 == !b2){
+                                return -1;
+                            }
+                            if (!b1 == b2){
+                                return 1;
+                            }
+                            return 0;
+                        }
+                    });
                     Log.v(TAG,userModel.toString());
-                    userModels.add(userModel);
-                    contactList.add(contact);
                     //refreshLayout.setRefreshing(false);
 
 
                 }
-                contactAdapter =new ContactAdapter(contactList,userModels,getContext());
-                contactAdapter.notifyDataSetChanged();
+                contactAdapter =new ContactAdapter(contactList,getContext());
                 recyclerView.setAdapter(contactAdapter);
 
+                refreshLayout.setRefreshing(false);
 
             }
 

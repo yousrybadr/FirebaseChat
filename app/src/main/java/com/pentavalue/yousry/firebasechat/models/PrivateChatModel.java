@@ -10,7 +10,6 @@ public class PrivateChatModel {
     private String message;
     private String timeStamp;
     private FileModel file;
-    private MapModel mapModel;
 
     public PrivateChatModel() {
     }
@@ -22,10 +21,9 @@ public class PrivateChatModel {
         this.file = file;
     }
 
-    public PrivateChatModel(UserModel userModel, String timeStamp, MapModel mapModel) {
+    public PrivateChatModel(UserModel userModel, String timeStamp) {
         this.userModel = userModel;
         this.timeStamp = timeStamp;
-        this.mapModel = mapModel;
     }
 
     public String getId() {
@@ -68,18 +66,11 @@ public class PrivateChatModel {
         this.file = file;
     }
 
-    public MapModel getMapModel() {
-        return mapModel;
-    }
 
-    public void setMapModel(MapModel mapModel) {
-        this.mapModel = mapModel;
-    }
 
     @Override
     public String toString() {
         return "PrivateChatModel{" +
-                "mapModel=" + mapModel +
                 ", file=" + file +
                 ", timeStamp='" + timeStamp + '\'' +
                 ", message='" + message + '\'' +
