@@ -45,6 +45,7 @@
             android:id="@+id/tvLocation"
             android:layout_marginTop="2dp"
             android:layout_below="@+id/img_chat"
+            android:textColor="@color/blackColor"
             android:textSize="10sp"
             android:text="Localização Recebida"
             android:layout_width="wrap_content"
@@ -56,6 +57,7 @@
     <TextView
         android:text="22/06/2016"
         android:id="@+id/timestamp"
+        android:textColor="@color/blackColor"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"

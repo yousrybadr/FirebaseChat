@@ -1,8 +1,10 @@
 
 package com.pentavalue.yousry.firebasechat.adapters;
 
+import android.nfc.Tag;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +16,9 @@ import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DatabaseReference;
 import com.pentavalue.yousry.firebasechat.R;
 import com.pentavalue.yousry.firebasechat.interfaces.ClickListenerChatFirebase;
+import com.pentavalue.yousry.firebasechat.models.Chat;
+import com.pentavalue.yousry.firebasechat.models.CurrentUser;
+import com.pentavalue.yousry.firebasechat.models.Message;
 import com.pentavalue.yousry.firebasechat.models.MessageModel;
 import com.pentavalue.yousry.firebasechat.models.PrivateRoomChat;
 import com.pentavalue.yousry.firebasechat.util.CircleTransform;
@@ -27,9 +32,9 @@ import hani.momanii.supernova_emoji_library.Helper.EmojiconTextView;
  * Created by Alessandro Barreto on 23/06/2016.
  */
 
-public class ChatFirebaseAdapter extends FirebaseRecyclerAdapter<MessageModel,ChatFirebaseAdapter.MyChatViewHolder> {
+public class ChatFirebaseAdapter extends FirebaseRecyclerAdapter<Message,ChatFirebaseAdapter.MyChatViewHolder> {
 
-    List<MessageModel> modelList;
+    public static final String TAG = ChatFirebaseAdapter.class.getSimpleName();
     private static final int RIGHT_MSG = 0;
     private static final int LEFT_MSG = 1;
     private static final int RIGHT_MSG_IMG = 2;
@@ -39,21 +44,16 @@ public class ChatFirebaseAdapter extends FirebaseRecyclerAdapter<MessageModel,Ch
 
     private String idUser;
 
-    private PrivateRoomChat roomChat;
 
 
 
 
 
-    public ChatFirebaseAdapter(DatabaseReference ref, String idUser, PrivateRoomChat roomChat, List<MessageModel> list,ClickListenerChatFirebase mClickListenerChatFirebase) {
-        super(MessageModel.class, R.layout.item_message_left, ChatFirebaseAdapter.MyChatViewHolder.class, ref);
+    public ChatFirebaseAdapter(DatabaseReference ref, String mCurrentUser) {
+        super(Message.class, R.layout.item_message_left, ChatFirebaseAdapter.MyChatViewHolder.class, ref);
+        this.idUser = mCurrentUser;
+        Log.v(TAG,"User ID = " +idUser);
 
-        this.modelList =list;
-
-
-        this.roomChat =roomChat;
-        this.idUser = idUser;
-        //this.mClickListenerChatFirebase = mClickListenerChatFirebase;
     }
 
     @Override
@@ -75,27 +75,25 @@ public class ChatFirebaseAdapter extends FirebaseRecyclerAdapter<MessageModel,Ch
     }
 
     @Override
-    protected void populateViewHolder(MyChatViewHolder viewHolder, MessageModel model, int position) {
-        if(model.getUserId().equals(roomChat.getFirst().getId()))
-            viewHolder.setIvUser(roomChat.getFirst().getImageUrl());
-        else
-            viewHolder.setIvUser(roomChat.getSecond().getImageUrl());
-
-
-        viewHolder.setTxtMessage(modelList.get(position).getText());
-        viewHolder.setTvTimestamp(modelList.get(position).getTimeStamp());
+    protected void populateViewHolder(MyChatViewHolder viewHolder, Message model, int position) {
+        viewHolder.setIvUser("https://firebasestorage.googleapis.com/v0/b/fir-library-81a54.appspot.com/o/images%2F2017-09-07_044310_gallery?alt=media&token=bf392434-ba25-4c6a-b28a-f6546933ed97");
+        viewHolder.setIvChatPhoto("https://firebasestorage.googleapis.com/v0/b/fir-library-81a54.appspot.com/o/images%2F2017-09-07_044310_gallery?alt=media&token=bf392434-ba25-4c6a-b28a-f6546933ed97");
+        viewHolder.setTvTimestamp(model.getTime());
+        viewHolder.setTxtMessage(model.getText());
 
 
 
     }
 
+
+
     @Override
     public int getItemViewType(int position) {
-
-        //MessageModel model = getItem(position);
-        if (modelList.get(position).getUserId().equals(idUser)){
+        Message message=getItem(position);
+        Log.v(TAG,"Sender ID = "+message.getSenderID());
+        if(message.getSenderID().equals(idUser)){
             return RIGHT_MSG;
-        }else{
+        }else {
             return LEFT_MSG;
         }
     }
@@ -121,12 +119,7 @@ public class ChatFirebaseAdapter extends FirebaseRecyclerAdapter<MessageModel,Ch
         @Override
         public void onClick(View view) {
             int position = getAdapterPosition();
-            MessageModel model = getItem(position);
-            /*if (model.getMapModel() != null){
-                //mClickListenerChatFirebase.clickImageMapChat(view,position,model.getMapModel().getLatitude(),model.getMapModel().getLongitude());
-            }else{
-                //mClickListenerChatFirebase.clickImageChat(view,position,model.getUserModel().getName(),model.getUserModel().getImageUrl(),model.getFile().getUrl_file());
-            }*/
+
         }
 
         public void setTxtMessage(String message){

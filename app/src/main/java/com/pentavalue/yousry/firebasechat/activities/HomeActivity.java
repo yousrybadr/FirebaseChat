@@ -11,6 +11,7 @@ import com.astuetz.PagerSlidingTabStrip;
 import com.google.firebase.auth.FirebaseAuth;
 import com.pentavalue.yousry.firebasechat.R;
 import com.pentavalue.yousry.firebasechat.adapters.ChatPagerAdapter;
+import com.pentavalue.yousry.firebasechat.models.CurrentUser;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -43,6 +44,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     public void onSignOut(MenuItem item) {
+        CurrentUser.setOurInstance(null);
         FirebaseAuth.getInstance().signOut();
         startActivity(new Intent(this,StartActivity.class));
         finish();

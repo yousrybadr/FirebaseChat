@@ -163,9 +163,9 @@
         style="@style/Widget.Design.FloatingActionButton"
         android:minHeight="150dp"
         android:minWidth="200dp"
+        android:layout_below="@+id/linear"
         android:layout_marginLeft="@dimen/fab_margin"
         android:layout_marginRight="@dimen/fab_margin"
-        android:layout_below="@+id/scroll"
         android:layout_alignParentEnd="true" />
 
 

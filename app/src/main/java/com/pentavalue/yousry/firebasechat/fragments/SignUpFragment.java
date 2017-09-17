@@ -33,6 +33,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.pentavalue.yousry.firebasechat.activities.HomeActivity;
 import com.pentavalue.yousry.firebasechat.R;
+import com.pentavalue.yousry.firebasechat.models.CurrentUser;
 import com.pentavalue.yousry.firebasechat.models.UserModel;
 import com.pentavalue.yousry.firebasechat.util.ActionIntent;
 import com.pentavalue.yousry.firebasechat.util.DatabaseRefs;
@@ -391,6 +392,7 @@ public class SignUpFragment extends Fragment implements View.OnClickListener{
         Log.v(TAG,user.toString());
         DatabaseReference ref = DatabaseRefs.mUsersDatabaseReference;
         ref.child(user.getId()).setValue(user);
+        CurrentUser.setOurInstance(user);
         //mDatabase.child(user.getId()).setValue(user);
 
     }

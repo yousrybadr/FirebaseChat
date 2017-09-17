@@ -1,16 +1,22 @@
 package com.pentavalue.yousry.firebasechat.models;
 
+import java.io.Serializable;
+
 /**
  * Created by yousry on 9/10/2017.
  */
 
-public class Contact {
+public class Contact implements Serializable {
     private String contact_id;
     private String contact_name;
     private String phone_number;
     private int phone_type;
+    private String chatID;
     private String userId;
     private String email;
+    private String imageURL;
+
+
     private boolean isMobile;
     private boolean isMessengerContact;
 
@@ -30,8 +36,10 @@ public class Contact {
         this.phone_type = -1;
         this.userId = "";
         this.email = "";
-        isMobile =false;
-        isMessengerContact =false;
+        this.isMobile =false;
+        this.imageURL ="";
+        this.chatID ="";
+        this.isMessengerContact =false;
     }
 
     public Contact(Contact contact) {
@@ -42,7 +50,9 @@ public class Contact {
         this.userId = contact.getUserId();
         this.email = contact.getEmail();
         isMobile = contact.isMobile();
+        this.chatID =contact.getChatID();
         isMessengerContact=contact.isMessengerContact();
+        this.imageURL =contact.getImageURL();
 
     }
 
@@ -53,8 +63,9 @@ public class Contact {
         this.phone_type = phone_type;
         this.userId = "";
         this.email = "";
-        isMobile =false;
-        isMessengerContact =false;
+        this.chatID ="";
+        this.isMobile =false;
+        this.isMessengerContact =false;
     }
 
     @Override
@@ -64,9 +75,11 @@ public class Contact {
                 ", contact_name='" + contact_name + '\'' +
                 ", phone_number='" + phone_number + '\'' +
                 ", phone_type=" + phone_type +
+                ", chatID='" + chatID + '\'' +
                 ", userId='" + userId + '\'' +
                 ", email='" + email + '\'' +
-                ", isMobile=" + isMobile + '\'' +
+                ", imageURL='" + imageURL + '\'' +
+                ", isMobile=" + isMobile +
                 ", isMessengerContact=" + isMessengerContact +
                 '}';
     }
@@ -78,7 +91,8 @@ public class Contact {
         this.phone_type = phone_type;
         this.userId = userId;
         this.email = email;
-        isMobile =false;
+        this.imageURL ="";
+        this.isMobile =false;
     }
 
     public boolean isMobile() {
@@ -135,5 +149,21 @@ public class Contact {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getImageURL() {
+        return imageURL;
+    }
+
+    public void setImageURL(String imageURL) {
+        this.imageURL = imageURL;
+    }
+
+    public String getChatID() {
+        return chatID;
+    }
+
+    public void setChatID(String chatID) {
+        this.chatID = chatID;
     }
 }

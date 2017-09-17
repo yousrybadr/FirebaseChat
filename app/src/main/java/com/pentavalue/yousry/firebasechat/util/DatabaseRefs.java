@@ -13,7 +13,7 @@ public class DatabaseRefs {
 
     public static DatabaseReference mRootDatabaseReference = mDatabase.child(Util.ROOT_DATABASE_REFERENCE);
     public static DatabaseReference mUsersDatabaseReference = mDatabase.child(Util.ROOT_DATABASE_REFERENCE).child(Util.USERS_DATABASE_REFERENCE);
-    public static DatabaseReference mRoomsDatabaseReference = mDatabase.child(Util.ROOT_DATABASE_REFERENCE).child(Util.CHAT_DATABASE_REFERENCE);
+    public static DatabaseReference mChatsDatabaseReference = mDatabase.child(Util.ROOT_DATABASE_REFERENCE).child(Util.CHAT_DATABASE_REFERENCE);
     public static DatabaseReference mMessagesDatabaseReference = mDatabase.child(Util.ROOT_DATABASE_REFERENCE).child(Util.MESSAGES_DATABASE_REFERENCE);
 
 

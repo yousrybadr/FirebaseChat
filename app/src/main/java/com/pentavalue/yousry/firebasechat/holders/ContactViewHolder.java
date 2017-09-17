@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -14,6 +15,7 @@ import android.widget.Toast;
 import com.pentavalue.yousry.firebasechat.R;
 import com.pentavalue.yousry.firebasechat.activities.ChatActivity;
 import com.pentavalue.yousry.firebasechat.models.Contact;
+import com.pentavalue.yousry.firebasechat.util.Util;
 
 import org.w3c.dom.Text;
 
@@ -25,6 +27,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ContactViewHolder extends RecyclerView.ViewHolder {
 
+    public static final String TAG =ContactViewHolder.class.getSimpleName();
 
     private Context context;
     private View view;
@@ -63,8 +66,20 @@ public class ContactViewHolder extends RecyclerView.ViewHolder {
         item_contact.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Log.v(TAG,contact.toString());
                 if(contact.isMessengerContact()){
-                    context.startActivity(new Intent(context, ChatActivity.class));
+                    if(contact.getChatID().isEmpty() || contact.getChatID() == null){
+                        context.startActivity(new Intent(context, ChatActivity.class)
+                                .putExtra(Util.CONTACT_KEY_MODEL,contact));
+                    }else{
+
+                        context.startActivity(new Intent(context, ChatActivity.class)
+                                .putExtra(Util.CHAT_KEY_MODEL,contact.getChatID())
+                        );
+                    }
+
+
+
                 }
             }
         });

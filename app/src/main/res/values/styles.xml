@@ -8,4 +8,10 @@
         <item name="colorAccent">@color/FontSystemColor</item>
     </style>
 
+    <style name="MyMaterialTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        ...
+    </style>
+
 </resources>

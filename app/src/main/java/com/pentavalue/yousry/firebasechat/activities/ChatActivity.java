@@ -2,16 +2,21 @@ package com.pentavalue.yousry.firebasechat.activities;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -24,202 +29,150 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.pentavalue.yousry.firebasechat.R;
 import com.pentavalue.yousry.firebasechat.adapters.ChatFirebaseAdapter;
 import com.pentavalue.yousry.firebasechat.interfaces.ClickListenerChatFirebase;
 import com.pentavalue.yousry.firebasechat.models.Chat;
+import com.pentavalue.yousry.firebasechat.models.Contact;
 import com.pentavalue.yousry.firebasechat.models.CurrentUser;
+import com.pentavalue.yousry.firebasechat.models.Message;
 import com.pentavalue.yousry.firebasechat.models.MessageModel;
 import com.pentavalue.yousry.firebasechat.models.PrivateRoomChat;
 import com.pentavalue.yousry.firebasechat.models.UserModel;
 import com.pentavalue.yousry.firebasechat.util.DatabaseRefs;
 import com.pentavalue.yousry.firebasechat.util.Util;
+import com.pentavalue.yousry.firebasechat.views.LoadingDialog;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import hani.momanii.supernova_emoji_library.Actions.EmojIconActions;
 import hani.momanii.supernova_emoji_library.Helper.EmojiconEditText;
 
-public class ChatActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener, ClickListenerChatFirebase {
-
-    private static final int IMAGE_GALLERY_REQUEST = 1;
-    private static final int IMAGE_CAMERA_REQUEST = 2;
-    private static final int PLACE_PICKER_REQUEST = 3;
+public class ChatActivity extends AppCompatActivity implements View.OnClickListener {
 
     static final String TAG = ChatActivity.class.getSimpleName();
-    static final String CHAT_REFERENCE = "PrivateRoomChat";
+    static final String CHAT_REFERENCE = "chats";
 
-    //Firebase and GoogleApiClient
-    private FirebaseAuth mFirebaseAuth;
-    private FirebaseUser mFirebaseUser;
-    private GoogleApiClient mGoogleApiClient;
+
     private DatabaseReference mFirebaseDatabaseReference;
-    FirebaseStorage storage = FirebaseStorage.getInstance();
 
-    //CLass Model
-    private UserModel mCurrentUser;
-    private UserModel mSecondUser;
 
     //Views UI
+    private Toolbar toolbar;
+    private CircleImageView imageProfile;
+    private TextView title;
     private RecyclerView rvListMessage;
     private LinearLayoutManager mLinearLayoutManager;
     private ImageView btSendMessage,btEmoji;
     private EmojiconEditText edMessage;
     private View contentRoot;
     private EmojIconActions emojIcon;
-    PrivateRoomChat roomChat;
+    private SwipeRefreshLayout refreshLayout;
+    Chat chat;
+    Contact contact;
 
-    // Storage Permissions
-    private static final int REQUEST_EXTERNAL_STORAGE = 1;
-    private static String[] PERMISSIONS_STORAGE = {
-            android.Manifest.permission.READ_EXTERNAL_STORAGE,
-            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-    };
+    LoadingDialog dialog;
+    private String currentUser;
+
+    DatabaseReference reference;
+    String chatID;
+    String userID;
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        Chat chat=new Chat();
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        imageProfile = (CircleImageView) findViewById(R.id.imageProfile);
+        title = (TextView) findViewById(R.id.title);
+
+        //setSupportActionBar(toolbar);
+
+        refreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeContiner);
 
 
-        FirebaseDatabase.getInstance().getReference().child(Util.ROOT_DATABASE_REFERENCE)
-                .child(Util.CHAT_DATABASE_REFERENCE).push().setValue(chat);
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                // Your code to refresh the list here.
+                // Make sure you call swipeContainer.setRefreshing(false)
+                // once the network request has completed successfully.
+                if(chatID ==null || chatID.isEmpty()){
+                    return;
+                }
+                loadMessagesFirebase(chatID);
+                refreshLayout.setRefreshing(false);
+            }
+        });
+        // Configure the refreshing colors
+        refreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
 
+        //getSupportActionBar().hide();
+        dialog =new LoadingDialog(ChatActivity.this);
+        bindViews();
 
-       /* mCurrentUser = CurrentUser.getInstance().getUserModel();
-
-        mSecondUser = (UserModel) getIntent().getSerializableExtra(Util.ITEM_USER_EXTRA_KEY);
-        roomChat =new PrivateRoomChat(mCurrentUser,mSecondUser,loadMessages());
 
 
         if (!Util.verifyNetworkConnection(this)){
             Util.initToast(this,getResources().getString(R.string.no_internet_connection));
             FirebaseDatabase.getInstance().goOffline();
             //finish();
-        }else{
-            bindViews();
-            verifyUser();
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .enableAutoManage(this, this)
-                    .addApi(Auth.GOOGLE_SIGN_IN_API)
-                    .build();
-        }*/
-    }
-
-   /* public void verifyStoragePermissions() {
-        // Check if we have write permission
-        int permission = ActivityCompat.checkSelfPermission(ChatActivity.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            // We don't have permission so prompt the user
-            ActivityCompat.requestPermissions(
-                    ChatActivity.this,
-                    PERMISSIONS_STORAGE,
-                    REQUEST_EXTERNAL_STORAGE
-            );
-        }else{
-            // we already have permission, lets go ahead and call camera intent
-            photoCameraIntent();
         }
-    }*/
 
-  /*  private void photoCameraIntent(){
-        String nomeFoto = DateFormat.format("yyyy-MM-dd_hhmmss", new Date()).toString();
-        filePathImageCamera = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), nomeFoto+"camera.jpg");
-        Intent it = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        Uri photoURI = FileProvider.getUriForFile(ChatActivity.this,
-                BuildConfig.APPLICATION_ID + ".provider",
-                filePathImageCamera);
-        it.putExtra(MediaStore.EXTRA_OUTPUT,photoURI);
-        startActivityForResult(it, IMAGE_CAMERA_REQUEST);
-    }*/
 
-    /**
-     * Enviar foto pela galeria
-     */
-    private void photoGalleryIntent(){
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, getString(R.string.select_picture_title)), IMAGE_GALLERY_REQUEST);
+        setChatModel();
+        loadMessagesFirebase(chatID);
+
+
     }
 
-    /**
-     * Enviar msg de texto simples para chat
-     */
+
     private void sendMessageFirebase(){
-        MessageModel model = new MessageModel(CurrentUser.getInstance().getUserModel().getId(),edMessage.getText().toString(), Calendar.getInstance().getTime().getTime()+"");
-        mFirebaseDatabaseReference =DatabaseRefs.mRoomsDatabaseReference.child(CHAT_REFERENCE);
-        mFirebaseDatabaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                String key =dataSnapshot.getValue(String.class);
-                Log.v(TAG,"Key is "+key);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
+        Message message =new Message();
+        message.setSenderID(currentUser);
+        message.setText(edMessage.getText().toString());
+        message.setTime(String.valueOf(Calendar.getInstance().getTimeInMillis()));
+        message.setType("text");
+        message.setId(chat.getId());
+        DatabaseRefs.mMessagesDatabaseReference.child(chat.getId()).push().setValue(message);
+        if(contact != null){
+            reference.setValue(chat);
+        }
         edMessage.setText(null);
     }
 
-    private void verifyUser(){
-        mFirebaseAuth = FirebaseAuth.getInstance();
-        mFirebaseUser = mFirebaseAuth.getCurrentUser();
-        if (mFirebaseUser == null){
-            startActivity(new Intent(this, StartActivity.class));
-            finish();
-        }else{
-            //userModel = new UserModel(mFirebaseUser.getDisplayName(), mFirebaseUser.getPhotoUrl().toString(), mFirebaseUser.getUid() );
-            loadMessagesFirebase();
-        }
+
+
+    void setToolbarViews(){
+        title.setText(chat.getConversationName());
+        Glide.with(this).load(chat.getWallpaperURL()).into(imageProfile);
     }
 
 
+    private void loadMessagesFirebase(String id){
 
-    private void loadMessagesFirebase(){
-        mFirebaseDatabaseReference = DatabaseRefs.mRoomsDatabaseReference;
-        mFirebaseDatabaseReference
-                .child(CHAT_REFERENCE)
-                .push().setValue(roomChat)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                DatabaseReference ref =mFirebaseDatabaseReference.child("PrivateRoomChat");
-                Log.v(TAG,"Ref is :"+ref.getKey());
-                ref.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
+        //setToolbarViews();
+        Log.v(TAG,"Load Messages Firebase from "+id);
+
+       mFirebaseDatabaseReference = DatabaseRefs.mMessagesDatabaseReference.child(id);
+        final ChatFirebaseAdapter firebaseAdapter =
+                new ChatFirebaseAdapter(mFirebaseDatabaseReference, currentUser);
 
 
-                        Log.v(TAG,"Count is :"+dataSnapshot.getChildrenCount());
-
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-            }
-        });
-
-
-
-        final ChatFirebaseAdapter firebaseAdapter = new ChatFirebaseAdapter(mFirebaseDatabaseReference.child(CHAT_REFERENCE),
-                mCurrentUser.getId(),
-                roomChat,
-                loadMessages(),
-                this);
         firebaseAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
             public void onItemRangeInserted(int positionStart, int itemCount) {
@@ -234,15 +187,55 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
             }
         });
         rvListMessage.setLayoutManager(mLinearLayoutManager);
-        //rvListMessage.setAdapter(firebaseAdapter);
-        //swipeContainer.setRefreshing(false);
+        rvListMessage.setAdapter(firebaseAdapter);
+
 
     }
+    void setChatModel(){
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+        currentUser = CurrentUser.getInstance().getUserModel().getId();
+        // From RecentChat Fragment
+        if(getIntent().hasExtra(Util.CHAT_KEY_MODEL)){
 
+            contact =null;
+            chatID= getIntent().getStringExtra(Util.CHAT_KEY_MODEL);
+            Log.v(TAG,chatID);
+            DatabaseRefs.mChatsDatabaseReference.child(chatID).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    chat = dataSnapshot.getValue(Chat.class);
+                    //setTitle(chat.getConversationName());
+                    setToolbarViews();
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+            // From Contacts Fragment
+        }else if(getIntent().hasExtra(Util.CONTACT_KEY_MODEL)){
+            contact = (Contact) getIntent().getSerializableExtra(Util.CONTACT_KEY_MODEL);
+            if(contact != null) Log.v(TAG,contact.toString());
+            userID =contact.getUserId();
+            Log.v(TAG,userID);
+            chat = new Chat();
+            chat.addMember(currentUser);
+            userID = contact.getUserId();
+            chat.addMember(contact.getUserId());
+            chat.setConversationName(contact.getContact_name());
+            chat.setGroup(false);
+            chat.setDateCreated(new SimpleDateFormat("dd/MM/yy HH:mm:ss").format(Calendar.getInstance().getTime()));
+            setToolbarViews();
+
+            reference = DatabaseRefs.mChatsDatabaseReference.push();
+
+
+            chatID = reference.getKey();
+            chat.setId(chatID);
+            if(chatID != null ) Log.v(TAG,"Chat Tag ID from Contact :" + chatID);
+        }
     }
 
     private void bindViews(){
@@ -257,12 +250,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         mLinearLayoutManager = new LinearLayoutManager(this);
         mLinearLayoutManager.setStackFromEnd(true);
     }
-    private void signOut(){
-        mFirebaseAuth.signOut();
-        Auth.GoogleSignInApi.signOut(mGoogleApiClient);
-        startActivity(new Intent(this, StartActivity.class));
-        finish();
-    }
+
     @Override
     public void onClick(View view) {
         int id =view.getId();
@@ -275,43 +263,4 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         }
     }
 
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-
-    }
-
-    @Override
-    public void clickImageChat(View view, int position, String nameUser, String urlPhotoUser, String urlPhotoClick) {
-
-    }
-
-    @Override
-    public void clickImageMapChat(View view, int position, String latitude, String longitude) {
-
-    }
-
-    private List<MessageModel> loadMessages(){
-        List<MessageModel> messageModels=new ArrayList<>();
-        MessageModel messageModel=new MessageModel("eyds8ss0UZa6DfvXxkNXhM8BWX43","hi", Calendar.getInstance().getTime().getTime()+"");
-        MessageModel messageModel1=new MessageModel("wiEfDOXCF3cOM202qkZLsR1BLfn2","hi", Calendar.getInstance().getTime().getTime()+"");
-        MessageModel messageModel2=new MessageModel("eyds8ss0UZa6DfvXxkNXhM8BWX43","hw r u?", Calendar.getInstance().getTime().getTime()+"");
-        MessageModel messageModel3=new MessageModel("wiEfDOXCF3cOM202qkZLsR1BLfn2","fine", Calendar.getInstance().getTime().getTime()+"");
-        MessageModel messageModel4=new MessageModel("eyds8ss0UZa6DfvXxkNXhM8BWX43","where are u from ?", Calendar.getInstance().getTime().getTime()+"");
-        MessageModel messageModel5=new MessageModel("eyds8ss0UZa6DfvXxkNXhM8BWX43","???", Calendar.getInstance().getTime().getTime()+"");
-        MessageModel messageModel6=new MessageModel("wiEfDOXCF3cOM202qkZLsR1BLfn2","Egy", Calendar.getInstance().getTime().getTime()+"");
-        MessageModel messageModel7=new MessageModel("eyds8ss0UZa6DfvXxkNXhM8BWX43","Block !", Calendar.getInstance().getTime().getTime()+"");
-
-        messageModels.add(messageModel);
-        messageModels.add(messageModel1);
-        messageModels.add(messageModel2);
-        messageModels.add(messageModel3);
-        messageModels.add(messageModel4);
-        messageModels.add(messageModel5);
-        messageModels.add(messageModel6);
-        messageModels.add(messageModel7);
-
-
-        return messageModels;
-    }
 }

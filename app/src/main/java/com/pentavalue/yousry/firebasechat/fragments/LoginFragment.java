@@ -19,11 +19,19 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 import com.pentavalue.yousry.firebasechat.activities.HomeActivity;
 import com.pentavalue.yousry.firebasechat.R;
+import com.pentavalue.yousry.firebasechat.activities.SplashActivity;
+import com.pentavalue.yousry.firebasechat.models.CurrentUser;
+import com.pentavalue.yousry.firebasechat.models.UserModel;
 import com.pentavalue.yousry.firebasechat.util.DatabaseRefs;
 import com.pentavalue.yousry.firebasechat.util.Logs;
+import com.pentavalue.yousry.firebasechat.util.Util;
 import com.pentavalue.yousry.firebasechat.util.Validation;
 import com.pentavalue.yousry.firebasechat.views.LoadingDialog;
 
@@ -131,8 +139,7 @@ public class LoginFragment extends Fragment {
                     public void onSuccess(AuthResult authResult) {
                         Logs.LogV(TAG, "Success :" + authResult.getUser().getEmail());
                         //CurrentUser.getInstance().setUserModel(new Helper().setUserModel(authResult.getUser()));
-                        startActivity(new Intent(getActivity(), HomeActivity.class));
-                        loadingDialog.hideProgressDialog();
+                        getUser(authResult.getUser(),loadingDialog);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -147,4 +154,28 @@ public class LoginFragment extends Fragment {
 
 
 
+    void getUser(FirebaseUser user, final LoadingDialog loadingDialog)
+    {
+        DatabaseReference userRef = DatabaseRefs.mUsersDatabaseReference.child(user.getUid());
+
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //CurrentUser.getInstance().setUserModel(dataSnapshot.getValue(UserModel.class));
+                //CurrentUser.getInstance().setUserModel(modal);
+                CurrentUser.setOurInstance(dataSnapshot.getValue(UserModel.class));
+                //Logs.LogV(TAG,"Login :" + modal.toString());
+                startActivity(new Intent(getContext(),HomeActivity.class));
+                loadingDialog.hideProgressDialog();
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                //Toast.makeText(getContext(),databaseError.getMessage(),Toast.LENGTH_LONG).show();
+                loadingDialog.hideProgressDialog();
+            }
+        });
+
+    }
 }

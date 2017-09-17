@@ -9,10 +9,41 @@
     android:orientation="vertical"
     android:background="@color/background">
 
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:background="@color/ForeSystemColor"
+        android:layout_width="match_parent"
+
+        android:layout_height="wrap_content">
+        <de.hdodenhof.circleimageview.CircleImageView
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/imageProfile"
+            android:layout_margin="5dp"
+            android:layout_width="50dp"
+
+            android:layout_height="50dp"
+            android:src="@drawable/icon_user"
+            app:civ_border_width="2dp"
+            app:civ_border_color="@color/FontSystemColor"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/title"
+            android:text="TEST"
+            android:textSize="16sp"
+            android:textAllCaps="true"
+            android:textStyle="bold"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+
+
+            android:textColor="@color/text_blue_selector"/>
+    </android.support.v7.widget.Toolbar>
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
+
 
 
         <android.support.v4.widget.SwipeRefreshLayout

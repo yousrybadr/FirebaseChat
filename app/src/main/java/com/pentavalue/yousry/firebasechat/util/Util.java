@@ -48,7 +48,8 @@ public class Util {
     public static final String FOLDER_STORAGE_VIDEO = "videos";
     public static final String FOLDER_STORAGE_DOCUMENT = "documents";
     public static final String FOLDER_STORAGE_AUDIO = "audioFiles";
-
+    public static final String CHAT_KEY_MODEL = "CHAT_KEY_MODEL";
+    public static final String CONTACT_KEY_MODEL = "CONTACT_KEY_MODEL";
 
     //Initailize Toast For Confirmation
     public static void initToast(Context c, String message){

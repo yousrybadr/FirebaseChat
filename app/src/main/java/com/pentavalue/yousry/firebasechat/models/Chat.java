@@ -21,7 +21,7 @@ public class Chat {
         this.conversationName = "";
         this.dateCreated = "";
         this.isGroup = false;
-        this.wallpaperURL = "";
+        this.wallpaperURL = "https://firebasestorage.googleapis.com/v0/b/fir-library-81a54.appspot.com/o/images%2F2017-09-07_044310_gallery?alt=media&token=bf392434-ba25-4c6a-b28a-f6546933ed97";
         this.members = new ArrayList<>();
         this.id = "";
     }

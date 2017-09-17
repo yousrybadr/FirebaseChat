@@ -41,16 +41,13 @@ public class RecentChatHolder extends RecyclerView.ViewHolder {
         photo = (CircleImageView) view.findViewById(R.id.image_chat);
         item_chat = view.findViewById(R.id.item_chat);
 
-        Glide.with(context)
-                .load(chat.getChatImage());
+
+        name.setText(chat.getConversationName());
+        phone.setText("Hi");
+        Glide.with(context).load(chat.getWallpaperURL())
+                .into(photo);
 
 
-        item_chat.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                context.startActivity(new Intent(context, ChatActivity.class));
-            }
-        });
 
 
     }

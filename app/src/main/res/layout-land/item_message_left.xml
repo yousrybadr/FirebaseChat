@@ -34,6 +34,7 @@
         android:id="@+id/txtMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:textColor="@color/blackColor"
         android:textIsSelectable="true"
         android:text="Alessandr sdlsdklsd \n slkdlskdlks \nsdlkslkds dsdso"
         emojicon:emojiconSize="28sp"
@@ -48,7 +49,9 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
         android:paddingLeft="10dp"
+        android:textColor="@color/blackColor"
         android:paddingTop="6dp"
+
         android:textSize="10sp"
         android:layout_below="@+id/contentMessageChat"
         android:layout_toEndOf="@+id/ivUserChat" />
