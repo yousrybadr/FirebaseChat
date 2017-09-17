@@ -45,6 +45,42 @@ public class Message {
         this.time =time;
         this.text = text;
         this.type = type;
+        this.id ="";
+        this.audio = "";
+        this.latitude = 0.0;
+        this.longitude = 0.0;
+        this.pictureURL = "";
+        this.status = "";
+        this.videoURL = "";
+    }
+
+    public Message(String pictureURL, String senderID, String time, String type) {
+        this.pictureURL = pictureURL;
+        this.senderID = senderID;
+        this.time = time;
+        this.type = type;
+        this.id ="";
+        this.audio = "";
+        this.latitude = 0.0;
+        this.longitude = 0.0;
+        this.messageNum = 0;
+        this.senderThimbnal = "";
+        this.status = "";
+        this.videoURL = "";
+    }
+    public Message(double Lat, double Lng, String SenderName, String type, String time) {
+        this.pictureURL = "";
+        this.senderID = SenderName;
+        this.time = time;
+        this.type = type;
+        this.id ="";
+        this.audio = "";
+        this.latitude = Lat;
+        this.longitude = Lng;
+        this.messageNum = 0;
+        this.senderThimbnal = "";
+        this.status = "";
+        this.videoURL = "";
     }
 
     public String getId() {

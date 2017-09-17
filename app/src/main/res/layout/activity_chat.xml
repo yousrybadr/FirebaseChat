@@ -26,7 +26,7 @@
             app:civ_border_width="2dp"
             app:civ_border_color="@color/FontSystemColor"/>
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:id="@+id/title"
             android:text="TEST"
@@ -38,6 +38,19 @@
 
 
             android:textColor="@color/text_blue_selector"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/typingTextView"
+            android:text="Typing ..."
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:textAllCaps="true"
+            android:textColor="@color/greenColorLight"
+            android:textSize="16sp"
+            android:visibility="gone"
+            android:textStyle="bold"/>
     </android.support.v7.widget.Toolbar>
     <FrameLayout
         android:layout_width="match_parent"
@@ -84,6 +97,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/editTextMessage"
+            android:textColor="@color/blackColor"
             android:layout_toStartOf="@+id/buttonMessage"
             android:layout_toRightOf="@+id/buttonEmoji"
             android:layout_toEndOf="@+id/buttonEmoji"

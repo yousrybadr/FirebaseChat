@@ -1,9 +1,18 @@
 package com.pentavalue.yousry.firebasechat.fragments;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.nfc.Tag;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -48,6 +57,7 @@ public class ContactFragment extends Fragment {
     public static final String TAG = ContactFragment.class.getSimpleName();
 
     static List<Contact> contactList;
+    private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
 
     @BindView(R.id.swipeContainer)
     SwipeRefreshLayout refreshLayout;
@@ -284,6 +294,65 @@ public class ContactFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission is granted
+                //showContacts();
+                contactList =ReadAllContacts(getContext());
+            } else {
+                //Toast.makeText(this, "Until you grant the permission, we canot display the names", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    public List<Contact> ReadAllContacts(Context context){
+        List<Contact> contacts =new ArrayList<>();
+        //Contact contact=new Contact();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if( context.checkSelfPermission( Manifest.permission.READ_CONTACTS ) != PackageManager.PERMISSION_GRANTED )
+                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
+        }
+        ContentResolver cr = context.getContentResolver();
+        Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
+        if (cur.getCount() > 0) {
+            while (cur.moveToNext()) {
+                Contact contact =new Contact();
+                contact.setContact_id(cur.getString(cur.getColumnIndex(ContactsContract.Contacts._ID)));
+                contact.setContact_name(cur.getString(cur.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)));
+
+                if (Integer.parseInt(cur.getString(cur.getColumnIndex(
+                        ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0) {
+                    Cursor pCur = cr.query(
+                            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                            null,
+                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID +" = ?",
+                            new String[]{contact.getContact_id()}, null);
+                    while (pCur.moveToNext()) {
+
+                        contact.setPhone_type(pCur.getInt(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.TYPE)));
+                        contact.setPhone_number(pCur.getString(pCur.getColumnIndex(
+                                ContactsContract.CommonDataKinds.Phone.NUMBER)));
+                        if(contact.getPhone_type() == ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE){
+                            contact.setMobile(true);
+                            break;
+                        }
+
+                    }
+                    pCur.close();
+                }
+
+                contacts.add(new Contact(contact));
+
+
+            }
+        }
+        return contacts;
     }
 
 

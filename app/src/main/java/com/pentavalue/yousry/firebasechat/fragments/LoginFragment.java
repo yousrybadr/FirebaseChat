@@ -2,6 +2,7 @@ package com.pentavalue.yousry.firebasechat.fragments;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -43,6 +44,7 @@ import butterknife.Unbinder;
 
 public class LoginFragment extends Fragment {
     public static final String TAG =LoginFragment.class.getSimpleName();
+
 
     @BindView(R.id.editTextUserNameLogin)
     EditText email;
@@ -122,6 +124,14 @@ public class LoginFragment extends Fragment {
 
 
     private void signIn(String email, String password) {
+        SharedPreferences.Editor editor = getContext().getSharedPreferences(Util.SHARED_PREFERENCE_KEY, getContext().MODE_PRIVATE).edit();
+        if(rememberMeCheck.isChecked()){
+            editor.putBoolean(Util.LOGIN_PREFERENCE_KEY,true);
+        }else{
+            editor.putBoolean(Util.LOGIN_PREFERENCE_KEY,false);
+        }
+        editor.apply();
+
         Log.d(TAG, "signIn:" + email);
         final LoadingDialog loadingDialog =new LoadingDialog(getContext());
         loadingDialog.showProgressDialog("Login","Loading...",false);

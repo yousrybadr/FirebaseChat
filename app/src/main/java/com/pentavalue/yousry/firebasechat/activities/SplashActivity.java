@@ -2,13 +2,17 @@ package com.pentavalue.yousry.firebasechat.activities;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -52,6 +56,7 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_splash);
+
         //startService(new Intent(SplashActivity.this,MyService.class));
         //Intent ishintent = new Intent(this, MyService.class);
         //PendingIntent pintent = PendingIntent.getService(this, 0, ishintent, 0);
@@ -71,6 +76,22 @@ public class SplashActivity extends AppCompatActivity {
 
         mContentView = findViewById(R.id.imageSplash);
 
+        if(Util.verifyNetworkConnection(this)){
+            Toast.makeText(getApplicationContext(),getResources().getString(R.string.no_internet_connection),Toast.LENGTH_LONG).show();
+            Snackbar snackbar = Snackbar
+                    .make(mContentView, getResources().getString(R.string.no_internet_connection), Snackbar.LENGTH_LONG)
+                    .setAction("Open WIFI", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Snackbar snackbar1 = Snackbar.make(mContentView, "Wifi is enabled now", Snackbar.LENGTH_SHORT);
+                            WifiManager wifi = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+                            wifi.setWifiEnabled(true);
+                            snackbar1.show();
+                        }
+                    });
+
+            snackbar.show();
+        }
 
         // Set up the user interaction to manually show or hide the system UI.
         mContentView.setOnClickListener(new View.OnClickListener() {
@@ -106,7 +127,19 @@ public class SplashActivity extends AppCompatActivity {
             public void onAnimationEnd(Animation animation) {
                 mContentView.startAnimation(an2);
 
+                finish();
                 FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+                SharedPreferences preferences =getSharedPreferences(Util.SHARED_PREFERENCE_KEY,MODE_PRIVATE);
+                if(preferences.contains(Util.LOGIN_PREFERENCE_KEY)){
+                    if(!preferences.getBoolean(Util.LOGIN_PREFERENCE_KEY,false)){
+                        FirebaseAuth.getInstance().signOut();
+                        startActivity(new Intent(getApplicationContext(),StartActivity.class)
+                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        );
+                        return;
+                    }
+                }
                 if(firebaseUser !=null){
 
                     DatabaseReference userRef = DatabaseRefs.mUsersDatabaseReference.child(firebaseUser.getUid());
@@ -119,6 +152,7 @@ public class SplashActivity extends AppCompatActivity {
                             model[0] =dataSnapshot.getValue(UserModel.class);
                             CurrentUser.setOurInstance(model[0]);
                             //Logs.LogV(TAG,"Login :" + modal.toString());
+                            startActivity(new Intent(SplashActivity.this,HomeActivity.class).putExtra(Util.CURRENT_USER_EXTRA_KEY,model[0]));
 
                         }
 
@@ -127,7 +161,6 @@ public class SplashActivity extends AppCompatActivity {
                             //Toast.makeText(getContext(),databaseError.getMessage(),Toast.LENGTH_LONG).show();
                         }
                     });
-                    startActivity(new Intent(SplashActivity.this,HomeActivity.class).putExtra(Util.CURRENT_USER_EXTRA_KEY,model[0]));
 
                 }else {
                     startActivity(new Intent(SplashActivity.this,StartActivity.class));

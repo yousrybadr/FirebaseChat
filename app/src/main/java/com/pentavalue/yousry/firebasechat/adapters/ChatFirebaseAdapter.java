@@ -10,18 +10,26 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 import com.pentavalue.yousry.firebasechat.R;
+import com.pentavalue.yousry.firebasechat.holders.RecentChatHolder;
 import com.pentavalue.yousry.firebasechat.interfaces.ClickListenerChatFirebase;
 import com.pentavalue.yousry.firebasechat.models.Chat;
 import com.pentavalue.yousry.firebasechat.models.CurrentUser;
 import com.pentavalue.yousry.firebasechat.models.Message;
 import com.pentavalue.yousry.firebasechat.models.MessageModel;
 import com.pentavalue.yousry.firebasechat.models.PrivateRoomChat;
+import com.pentavalue.yousry.firebasechat.models.UserModel;
 import com.pentavalue.yousry.firebasechat.util.CircleTransform;
+import com.pentavalue.yousry.firebasechat.util.DatabaseRefs;
+import com.pentavalue.yousry.firebasechat.util.Util;
 
 import java.util.List;
 
@@ -44,14 +52,19 @@ public class ChatFirebaseAdapter extends FirebaseRecyclerAdapter<Message,ChatFir
 
     private String idUser;
 
+    private Chat chat;
 
 
 
 
 
-    public ChatFirebaseAdapter(DatabaseReference ref, String mCurrentUser) {
+
+
+
+    public ChatFirebaseAdapter(DatabaseReference ref, String mCurrentUser, Chat chat) {
         super(Message.class, R.layout.item_message_left, ChatFirebaseAdapter.MyChatViewHolder.class, ref);
         this.idUser = mCurrentUser;
+        this.chat =chat;
         Log.v(TAG,"User ID = " +idUser);
 
     }
@@ -76,10 +89,21 @@ public class ChatFirebaseAdapter extends FirebaseRecyclerAdapter<Message,ChatFir
 
     @Override
     protected void populateViewHolder(MyChatViewHolder viewHolder, Message model, int position) {
-        viewHolder.setIvUser("https://firebasestorage.googleapis.com/v0/b/fir-library-81a54.appspot.com/o/images%2F2017-09-07_044310_gallery?alt=media&token=bf392434-ba25-4c6a-b28a-f6546933ed97");
-        viewHolder.setIvChatPhoto("https://firebasestorage.googleapis.com/v0/b/fir-library-81a54.appspot.com/o/images%2F2017-09-07_044310_gallery?alt=media&token=bf392434-ba25-4c6a-b28a-f6546933ed97");
+        //viewHolder.setIvUser("https://firebasestorage.googleapis.com/v0/b/fir-library-81a54.appspot.com/o/images%2F2017-09-07_044310_gallery?alt=media&token=bf392434-ba25-4c6a-b28a-f6546933ed97");
+        //viewHolder.setIvChatPhoto("https://firebasestorage.googleapis.com/v0/b/fir-library-81a54.appspot.com/o/images%2F2017-09-07_044310_gallery?alt=media&token=bf392434-ba25-4c6a-b28a-f6546933ed97");
+
+
+        viewHolder.loadUserModel(chat);
+
         viewHolder.setTvTimestamp(model.getTime());
-        viewHolder.setTxtMessage(model.getText());
+        if(model.getType().equals("text")){
+            viewHolder.setTxtMessage(model.getText());
+        }else if(model.getType().equals("image")){
+            viewHolder.setIvChatPhoto(model.getPictureURL());
+        }else if(model.getType().equals("map")){
+            viewHolder.setIvChatPhoto(Util.local(String.valueOf(model.getLatitude()),String.valueOf(model.getLongitude())));
+
+        }
 
 
 
@@ -90,12 +114,31 @@ public class ChatFirebaseAdapter extends FirebaseRecyclerAdapter<Message,ChatFir
     @Override
     public int getItemViewType(int position) {
         Message message=getItem(position);
-        Log.v(TAG,"Sender ID = "+message.getSenderID());
-        if(message.getSenderID().equals(idUser)){
-            return RIGHT_MSG;
-        }else {
+
+        if(message.getType().equals("text")){
+            Log.v(TAG,"Sender ID = "+message.getSenderID());
+            if(message.getSenderID().equals(idUser)){
+                return RIGHT_MSG;
+            }else {
+                return LEFT_MSG;
+            }
+        }else if(message.getType().equals("image")){
+            Log.v(TAG,"Sender ID = "+message.getSenderID());
+            if(message.getSenderID().equals(idUser)){
+                return RIGHT_MSG_IMG;
+            }else {
+                return LEFT_MSG_IMG;
+            }
+        }else if(message.getType().equals("map")){
+            if(message.getSenderID().equals(idUser)){
+                return RIGHT_MSG_IMG;
+            }else {
+                return LEFT_MSG_IMG;
+            }
+        }else{
             return LEFT_MSG;
         }
+
     }
 
 
@@ -150,6 +193,31 @@ public class ChatFirebaseAdapter extends FirebaseRecyclerAdapter<Message,ChatFir
             if (tvLocation == null)return;
             tvLocation.setVisibility(visible);
         }
+
+        public void loadUserModel(Chat chat){
+            DatabaseReference ref;
+            if(chat.getMember(0).equals(CurrentUser.getInstance().getUserModel().getId())){
+                ref = DatabaseRefs.mUsersDatabaseReference.child(chat.getMember(1));
+            }else{
+                ref = DatabaseRefs.mUsersDatabaseReference.child(chat.getMember(0));
+            }
+
+            ref.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    UserModel model =dataSnapshot.getValue(UserModel.class);
+                    if(idUser.equals(model.getId())){
+                        setIvUser(model.getImageUrl());
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+
 
     }
 

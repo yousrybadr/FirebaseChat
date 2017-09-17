@@ -1,10 +1,15 @@
 package com.pentavalue.yousry.firebasechat.util;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
+import android.os.Build;
 import android.provider.ContactsContract;
+import android.support.v4.app.ActivityCompat;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.widget.Toast;
@@ -30,8 +35,12 @@ public class Util {
     public static final String USERS_DATABASE_REFERENCE = "users";
     public static final String CHAT_DATABASE_REFERENCE = "chats";
     public static final String MESSAGES_DATABASE_REFERENCE = "messages";
+    public static final String TYPING_DATABASE_REFERENCE = "typing";
+
 
     public static final String SHARED_PREFERENCE_KEY ="chat_app";
+    public static final String LOGIN_PREFERENCE_KEY ="login";
+
     public static final String CURRENT_USER_EXTRA_KEY ="current_user";
     public static final String ITEM_USER_EXTRA_KEY ="selected_user";
 
@@ -75,6 +84,10 @@ public class Util {
     public static List<Contact> ReadAllContacts(Context context){
         List<Contact> contacts =new ArrayList<>();
         //Contact contact=new Contact();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if( context.checkSelfPermission( Manifest.permission.READ_CONTACTS ) != PackageManager.PERMISSION_GRANTED )
+                ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.READ_CONTACTS}, 1);
+        }
         ContentResolver cr = context.getContentResolver();
         Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
         if (cur.getCount() > 0) {
