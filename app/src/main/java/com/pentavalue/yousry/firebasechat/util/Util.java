@@ -44,6 +44,7 @@ public class Util {
     public static final String CURRENT_USER_EXTRA_KEY ="current_user";
     public static final String ITEM_USER_EXTRA_KEY ="selected_user";
 
+    public static final String FIRST_TIME_KEY ="first_time_key";
 
 
 

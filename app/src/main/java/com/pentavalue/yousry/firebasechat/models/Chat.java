@@ -17,15 +17,6 @@ public class Chat {
     private String wallpaperURL;
     private List<String> members;
     private String id;
-    private boolean typing ;
-
-    public boolean isTyping() {
-        return typing;
-    }
-
-    public void setTyping(boolean typing) {
-        this.typing = typing;
-    }
 
     public Chat() {
         this.chatImage = "";
@@ -35,7 +26,6 @@ public class Chat {
         this.wallpaperURL = "https://firebasestorage.googleapis.com/v0/b/fir-library-81a54.appspot.com/o/images%2F2017-09-07_044310_gallery?alt=media&token=bf392434-ba25-4c6a-b28a-f6546933ed97";
         this.members = new ArrayList<>();
         this.id = "";
-        this.typing =false;
     }
 
     public void addMember(String userId){
@@ -128,7 +118,6 @@ public class Chat {
                 ", wallpaperURL='" + wallpaperURL + '\'' +
                 ", members=" + listToString() +
                 ", id='" + id + '\'' +
-                ", typing='" + typing + '\'' +
                 '}';
     }
 

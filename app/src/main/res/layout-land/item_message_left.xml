@@ -36,7 +36,7 @@
         android:layout_height="wrap_content"
         android:textColor="@color/blackColor"
         android:textIsSelectable="true"
-        android:text="Alessandr sdlsdklsd \n slkdlskdlks \nsdlkslkds dsdso"
+        android:text="Test"
         emojicon:emojiconSize="28sp"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 

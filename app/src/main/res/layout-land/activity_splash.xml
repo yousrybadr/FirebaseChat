@@ -27,5 +27,17 @@
         android:gravity="center"
         android:layout_below="@+id/imageSplash"
 
+        android:id="@+id/text"
         android:text="@string/textViewSplach"/>
+    <ProgressBar
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:id="@+id/progress"
+        android:visibility="invisible"
+        android:layout_below="@+id/text"
+        android:progress="@android:integer/config_shortAnimTime"
+        android:layout_marginTop="@dimen/margin_five"
+        android:layout_marginBottom="@dimen/margin_five"
+        android:layout_centerHorizontal="true"
+        />
 </RelativeLayout>

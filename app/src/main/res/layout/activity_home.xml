@@ -39,7 +39,7 @@
         android:id="@+id/tabs"
         app:pstsShouldExpand="true"
 
-        android:textColor="#000000"
+        android:textColor="@color/whiteColor"
         android:textSize="14sp"
         app:pstsTabPaddingLeftRight="14dp"
         app:pstsTextAllCaps="true"

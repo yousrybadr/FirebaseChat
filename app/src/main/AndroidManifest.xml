@@ -10,8 +10,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.SEND_SMS" />
-    <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
-
+    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
 
     <application
         android:name=".util.MyApp"
@@ -37,7 +36,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.HomeActivity"
+        <activity
+            android:name=".activities.HomeActivity"
             android:theme="@style/MyMaterialTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -45,7 +45,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.ChatActivity"
+        <activity
+            android:name=".activities.ChatActivity"
             android:theme="@style/MyMaterialTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -53,9 +54,18 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDTT_0EClbhFGpN3WDLm2aBdu2JlUH4lSs"/>
+            android:value="AIzaSyDTT_0EClbhFGpN3WDLm2aBdu2JlUH4lSs" />
+
+        <activity android:name=".activities.FullScreenImageActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

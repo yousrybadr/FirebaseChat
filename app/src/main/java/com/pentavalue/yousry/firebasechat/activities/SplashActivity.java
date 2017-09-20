@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -29,6 +30,7 @@ import com.pentavalue.yousry.firebasechat.util.Util;
 public class SplashActivity extends AppCompatActivity {
     private static final boolean AUTO_HIDE = true;
 
+    ProgressBar progressBar;
     /**
      * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
      * user interaction before hiding the system UI.
@@ -57,6 +59,7 @@ public class SplashActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_splash);
 
+        progressBar = (ProgressBar) findViewById(R.id.progress);
         //startService(new Intent(SplashActivity.this,MyService.class));
         //Intent ishintent = new Intent(this, MyService.class);
         //PendingIntent pintent = PendingIntent.getService(this, 0, ishintent, 0);
@@ -127,7 +130,7 @@ public class SplashActivity extends AppCompatActivity {
             public void onAnimationEnd(Animation animation) {
                 mContentView.startAnimation(an2);
 
-                finish();
+                progressBar.setVisibility(View.VISIBLE);
                 FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
                 SharedPreferences preferences =getSharedPreferences(Util.SHARED_PREFERENCE_KEY,MODE_PRIVATE);
                 if(preferences.contains(Util.LOGIN_PREFERENCE_KEY)){
@@ -137,6 +140,7 @@ public class SplashActivity extends AppCompatActivity {
                                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
                                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                         );
+                        finish();
                         return;
                     }
                 }
@@ -153,6 +157,7 @@ public class SplashActivity extends AppCompatActivity {
                             CurrentUser.setOurInstance(model[0]);
                             //Logs.LogV(TAG,"Login :" + modal.toString());
                             startActivity(new Intent(SplashActivity.this,HomeActivity.class).putExtra(Util.CURRENT_USER_EXTRA_KEY,model[0]));
+                            finish();
 
                         }
 
@@ -164,6 +169,8 @@ public class SplashActivity extends AppCompatActivity {
 
                 }else {
                     startActivity(new Intent(SplashActivity.this,StartActivity.class));
+                    finish();
+
                 }
 
 

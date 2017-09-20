@@ -47,6 +47,13 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactViewHolder>  {
         return holder;
     }
 
+
+    @Override
+    public void onViewDetachedFromWindow(ContactViewHolder holder) {
+        super.onViewDetachedFromWindow(holder);
+        //holder.unbind();
+    }
+
     @Override
     public void onBindViewHolder(ContactViewHolder holder, final int position) {
         holder.bind(contacts.get(position),context);

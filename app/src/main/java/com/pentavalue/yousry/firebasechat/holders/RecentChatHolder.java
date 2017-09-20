@@ -3,6 +3,7 @@ package com.pentavalue.yousry.firebasechat.holders;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -49,9 +50,9 @@ public class RecentChatHolder extends RecyclerView.ViewHolder {
         phone = (TextView) view.findViewById(R.id.phone_chat);
         photo = (CircleImageView) view.findViewById(R.id.image_chat);
         item_chat = view.findViewById(R.id.item_chat);
-
-
         loadUserModel(chat);
+
+
 
 
 

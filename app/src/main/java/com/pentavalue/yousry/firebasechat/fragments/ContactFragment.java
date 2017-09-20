@@ -90,17 +90,18 @@ public class ContactFragment extends Fragment {
 
     }
 
+
+
     @Override
     public void onStart() {
         super.onStart();
-
 
     }
 
 
     void loadOffline() {
         Toast.makeText(getContext(), getResources().getString(R.string.no_internet_connection), Toast.LENGTH_SHORT).show();
-        contactList = Util.ReadAllContacts(getContext());
+        showContacts();
         contactAdapter = new ContactAdapter(contactList, getContext());
         recyclerView.setAdapter(contactAdapter);
 
@@ -113,6 +114,7 @@ public class ContactFragment extends Fragment {
         unbinder = ButterKnife.bind(this, view);
 
         chatContacts = new ArrayList<>();
+        contactList =new ArrayList<>();
 
 
         Log.v(TAG, "Start Fragment : " + TAG);
@@ -120,7 +122,10 @@ public class ContactFragment extends Fragment {
         //contactAdapter =new ContactAdapter(contactList,getContext());
         LinearLayoutManager llm = new LinearLayoutManager(getContext());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
-        contactList = Util.ReadAllContacts(getContext());
+        //contactList = Util.ReadAllContacts(getContext());
+
+        showContacts();
+
         //contactAdapter =new ContactAdapter(contactList,getContext());
         //recyclerView.setAdapter(contactAdapter);
         recyclerView.setLayoutManager(llm);
@@ -143,6 +148,8 @@ public class ContactFragment extends Fragment {
                     Toast.makeText(getContext(), getResources().getString(R.string.no_internet_connection), Toast.LENGTH_SHORT).show();
                     refreshLayout.setRefreshing(false);
                 } else {
+                    showContacts();
+                    //Collections.sort(contactList);
                     checkIsMessengerOrNot();
                     refreshLayout.setRefreshing(false);
                 }
@@ -162,6 +169,10 @@ public class ContactFragment extends Fragment {
     void checkIsMessengerOrNot() {
         chatContacts.clear();
         DatabaseReference ref = DatabaseRefs.mUsersDatabaseReference;
+        if(contactList.size() ==0 || contactList == null ){
+            Toast.makeText(getContext(),"You have not Contacts",Toast.LENGTH_SHORT).show();
+            return;
+        }
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -177,12 +188,9 @@ public class ContactFragment extends Fragment {
                                 continue;
                             }
                             if (contactList.get(i).getPhone_number().equals(userModel.getPhone())) {
-
                                 contactList.get(i).setMessengerContact(true);
                                 Log.v(TAG, contactList.get(i).getPhone_number());
-                                contactList.get(i).setUserId(userModel.getId());
-                                contactList.get(i).setEmail(userModel.getEmail());
-                                contactList.get(i).setImageURL(userModel.getImageUrl());
+                                contactList.get(i).setUserModel(userModel);
                                 chatContacts.add(contactList.get(i));
                             }
                         }
@@ -254,11 +262,11 @@ public class ContactFragment extends Fragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     Chat chat = snapshot.getValue(Chat.class);
-                    for (int i = 0; i < chatContacts.size(); i++) {
+                    for (int i = 0; i < contactList.size(); i++) {
                         if (contactList.get(i).isMessengerContact()) {
-                            if (chat.getMember(0).equals(curUser) && chat.getMember(1).equals(contactList.get(i).getUserId())) {
+                            if (chat.getMember(0).equals(curUser) && chat.getMember(1).equals(contactList.get(i).getUserModel().getId())) {
                                 contactList.get(i).setChatID(chat.getId());
-                            } else if (chat.getMember(1).equals(curUser) && chat.getMember(0).equals(contactList.get(i).getUserId())) {
+                            } else if (chat.getMember(1).equals(curUser) && chat.getMember(0).equals(contactList.get(i).getUserModel().getId())) {
                                 contactList.get(i).setChatID(chat.getId());
                             }
                         }
@@ -277,13 +285,6 @@ public class ContactFragment extends Fragment {
         });
     }
 
-
-
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-
-    }
 
     @Override
     public void onAttach(Context context) {
@@ -304,20 +305,28 @@ public class ContactFragment extends Fragment {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission is granted
                 //showContacts();
-                contactList =ReadAllContacts(getContext());
+                showContacts();
             } else {
                 //Toast.makeText(this, "Until you grant the permission, we canot display the names", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
+
+
+    private void showContacts(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && getContext().checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
+            //After this point you wait for callback in onRequestPermissionsResult(int, String[], int[]) overriden method
+        } else {
+            // Android version is lesser than 6.0 or the permission is already granted.
+            contactList = ReadAllContacts(getContext());
+            Collections.sort(contactList);
+        }
+    }
     public List<Contact> ReadAllContacts(Context context){
         List<Contact> contacts =new ArrayList<>();
-        //Contact contact=new Contact();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if( context.checkSelfPermission( Manifest.permission.READ_CONTACTS ) != PackageManager.PERMISSION_GRANTED )
-                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
-        }
+
         ContentResolver cr = context.getContentResolver();
         Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
         if (cur.getCount() > 0) {

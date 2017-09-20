@@ -25,6 +25,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.pentavalue.yousry.firebasechat.R;
 import com.pentavalue.yousry.firebasechat.activities.ChatActivity;
+import com.pentavalue.yousry.firebasechat.adapters.ChatFirebaseAdapter;
 import com.pentavalue.yousry.firebasechat.adapters.ContactAdapter;
 import com.pentavalue.yousry.firebasechat.adapters.RecentChatAdapter;
 import com.pentavalue.yousry.firebasechat.holders.RecentChatHolder;
@@ -45,6 +46,9 @@ import butterknife.Unbinder;
 public class RecentChatFragment extends Fragment {
 
     public static final String TAG = RecentChatFragment.class.getSimpleName();
+
+    private static final int REMOVED_ITEM = 0;
+    private static final int VIEW_ITEM = 1;
 
     private List<Chat> chatList;
 
@@ -143,31 +147,48 @@ public class RecentChatFragment extends Fragment {
         mAdapter = new FirebaseRecyclerAdapter<Chat, RecentChatHolder>(Chat.class, R.layout.recent_chat_item,
                 RecentChatHolder.class, mDatabase) {
             @Override
+            public int getItemViewType(int position) {
+                Chat model = getItem(position);
+                if(checkUser(model)){
+                    return VIEW_ITEM;
+                }else{
+                    return REMOVED_ITEM;
+                }
+            }
+
+            @Override
+            public RecentChatHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+                View view;
+                if(viewType == VIEW_ITEM){
+                    view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recent_chat_item,parent,false);
+                    return new RecentChatHolder(view);
+                }else{
+                    return null;
+                }
+            }
+
+            @Override
             protected void populateViewHolder(final RecentChatHolder viewHolder, final Chat model, final int position) {
                 final DatabaseReference chatRef = getRef(position);
-
 
                 if(CurrentUser.getInstance().getUserModel() ==null){
                     return;
                 }
-                if(checkUser(model)){
-                    // Set click listener for the whole post view
-                    final String chatRefKey = chatRef.getKey();
-                    viewHolder.bind(model,getContext());
-                    viewHolder.item_chat.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            // Launch PostDetailActivity
-                            Intent intent = new Intent(getActivity(), ChatActivity.class)
-                                    .putExtra(Util.CHAT_KEY_MODEL,model.getId());
-                            //intent.putExtra(PostDetailActivity.EXTRA_POST_KEY, postKey);
-                            startActivity(intent);
+                // Set click listener for the whole post view
+                final String chatRefKey = chatRef.getKey();
+                viewHolder.bind(model,getContext());
+                viewHolder.item_chat.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // Launch PostDetailActivity
+                        Intent intent = new Intent(getActivity(), ChatActivity.class)
+                                .putExtra(Util.CHAT_KEY_MODEL,model.getId());
+                        //intent.putExtra(PostDetailActivity.EXTRA_POST_KEY, postKey);
+                        startActivity(intent);
 
-                        }
-                    });
-                }else{
-                    chatRef.removeValue();
-                }
+                    }
+                });
+
 
 
             }
@@ -179,11 +200,11 @@ public class RecentChatFragment extends Fragment {
     boolean checkUser(Chat model){
         for(String item :model.getMembers()){
             if(item.equals(CurrentUser.getInstance().getUserModel().getId())){
-                Log.v(TAG,"User is TRUE");
+                Log.v(RecentChatHolder.class.getSimpleName(),"User is TRUE");
                 return true;
             }
         }
-        Log.v(TAG,"User is FALSE");
+        Log.v(RecentChatHolder.class.getSimpleName(),"User is FALSE");
         return false;
     }
     @Override

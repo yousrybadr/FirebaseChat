@@ -13,11 +13,52 @@
     <item
         android:title="@string/sendLocation"
         android:id="@+id/sendLocation"
+        android:icon="@android:drawable/ic_dialog_map"
         app:showAsAction="never"/>
 
-    <item
-        android:title="@string/sign_out"
-        android:id="@+id/sign_out"
-        app:showAsAction="never"/>
+
+    <item android:id="@+id/home_menu_setting"
+        android:title="Set Wallpaper"
+
+        >
+        <menu>
+
+                <group android:checkableBehavior="single"
+                    android:menuCategory="system"
+
+
+                    >
+                    <item
+                        android:title="RED"
+                        android:id="@+id/action_red"
+                        android:checked="true"
+                        android:icon="@color/redColorLight"
+                        app:showAsAction="never"/>
+                    <item
+                        android:title="GRAY"
+                        android:id="@+id/action_gray"
+                        android:checked="false"
+                        android:icon="@color/dark_gray"
+
+                        app:showAsAction="never"/>
+                    <item
+                        android:title="BLACK"
+                        android:id="@+id/action_black"
+                        android:checked="false"
+                        android:icon="@color/dark_gray"
+
+                        app:showAsAction="never"/>
+                    <item
+                        android:title="YELLOW"
+                        android:id="@+id/action_yellow"
+                        android:checked="false"
+                        android:icon="@color/yellowColorLight"
+
+                        app:showAsAction="never"/>
+                </group>
+
+        </menu>
+    </item>
+
 
 </menu>

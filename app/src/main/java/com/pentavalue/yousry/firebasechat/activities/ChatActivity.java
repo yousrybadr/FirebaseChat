@@ -12,37 +12,27 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
-import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.MutableData;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
@@ -50,25 +40,18 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.pentavalue.yousry.firebasechat.R;
 import com.pentavalue.yousry.firebasechat.adapters.ChatFirebaseAdapter;
-import com.pentavalue.yousry.firebasechat.interfaces.ClickListenerChatFirebase;
 import com.pentavalue.yousry.firebasechat.models.Chat;
 import com.pentavalue.yousry.firebasechat.models.Contact;
 import com.pentavalue.yousry.firebasechat.models.CurrentUser;
 import com.pentavalue.yousry.firebasechat.models.Message;
-import com.pentavalue.yousry.firebasechat.models.MessageModel;
-import com.pentavalue.yousry.firebasechat.models.PrivateRoomChat;
 import com.pentavalue.yousry.firebasechat.models.UserModel;
 import com.pentavalue.yousry.firebasechat.util.DatabaseRefs;
 import com.pentavalue.yousry.firebasechat.util.Util;
 import com.pentavalue.yousry.firebasechat.views.LoadingDialog;
 
-import org.w3c.dom.Text;
-
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import hani.momanii.supernova_emoji_library.Actions.EmojIconActions;
@@ -76,14 +59,25 @@ import hani.momanii.supernova_emoji_library.Helper.EmojiconEditText;
 
 public class ChatActivity extends AppCompatActivity implements View.OnClickListener, TextWatcher{
 
-    static final String TAG = ChatActivity.class.getSimpleName();
+    // static Variables
+    public static final String TAG = ChatActivity.class.getSimpleName();
     private static final int IMAGE_GALLERY_REQUEST = 1;
     private static final int IMAGE_CAMERA_REQUEST = 2;
     private static final int PLACE_PICKER_REQUEST = 3;
 
+    // Firebase
 
     private DatabaseReference mFirebaseDatabaseReference;
     private FirebaseStorage storage = FirebaseStorage.getInstance();
+
+    //models Classes
+
+    private Chat chat;
+    private Contact contact;
+    private LoadingDialog dialog;
+    private String currentUser;
+    private String chatID;
+
     //Views UI
 
     private TextView typingTextView;
@@ -92,44 +86,91 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     private TextView title;
     private RecyclerView rvListMessage;
     private LinearLayoutManager mLinearLayoutManager;
-    private ImageView btSendMessage,btEmoji;
+    private ImageView btSendMessage,btEmoji,btAttach;
+    private ImageView wallpaperImage;
     private EmojiconEditText edMessage;
     private View contentRoot;
     private EmojIconActions emojIcon;
     private SwipeRefreshLayout refreshLayout;
-    Chat chat;
-    Contact contact;
 
-    LoadingDialog dialog;
-    private String currentUser;
-
-    DatabaseReference reference;
-    String chatID;
-    String userID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
+        dialog =new LoadingDialog(ChatActivity.this);
+        bindViews();
+        setChatModel();
+    }
 
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
+    private void setChatModel(){
+
+        currentUser = CurrentUser.getInstance().getUserModel().getId();
+        Intent intent=getIntent();
+        // From RecentChat Fragment
+        if(intent.hasExtra(Util.CHAT_KEY_MODEL)){
+
+            contact = null;
+            chatID = intent.getStringExtra(Util.CHAT_KEY_MODEL);
+            Log.v(TAG,chatID);
+            DatabaseRefs.mChatsDatabaseReference.child(chatID).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    chat=  dataSnapshot.getValue(Chat.class);
+                    //setTitle(chat.getConversationName());
 
 
-        imageProfile = (CircleImageView) findViewById(R.id.imageProfile);
-        title = (TextView) findViewById(R.id.title);
+                    if(chat == null){
+                        Toast.makeText(getApplicationContext(),"Can not open Chat",Toast.LENGTH_SHORT).show();
 
-        //setSupportActionBar(toolbar);
+                        finish();
+                        return;
+                    }
+                    setToolbarViews(chat);
+                    loadMessagesFirebase(chat);
 
+                }
 
-        refreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeContiner);
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
 
+                }
+            });
+            // From Contacts Fragment
+            // First Time for conversation
+        }else if(intent.hasExtra(Util.FIRST_TIME_KEY)){
+            if(intent.getBooleanExtra(Util.FIRST_TIME_KEY,false)){
+                contact = (Contact) intent.getSerializableExtra(Util.CONTACT_KEY_MODEL);
+                if(contact != null) Log.v(TAG,contact.toString());
+                //userID =contact.getUserModel().getId();
+                //Log.v(TAG,userID);
+                chatID =contact.getChatID();
+                chat =createFirstChatNode();
+                loadMessagesFirebase(chat);
+            }
 
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (!Util.verifyNetworkConnection(this)){
+            Util.initToast(this,getResources().getString(R.string.no_internet_connection));
+            FirebaseDatabase.getInstance().goOffline();
+            FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+            //finish();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        typingTextView.setVisibility(View.INVISIBLE);
+        if(chat != null || chatID != null){
+            onTypingState();
+        }
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -146,31 +187,8 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                 refreshLayout.setRefreshing(false);
             }
         });
-        // Configure the refreshing colors
-        refreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright,
-                android.R.color.holo_green_light,
-                android.R.color.holo_orange_light,
-                android.R.color.holo_red_light);
-
-        //getSupportActionBar().hide();
-        dialog =new LoadingDialog(ChatActivity.this);
-        bindViews();
-
-
-
-        if (!Util.verifyNetworkConnection(this)){
-            Util.initToast(this,getResources().getString(R.string.no_internet_connection));
-            FirebaseDatabase.getInstance().goOffline();
-            FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-            //finish();
-        }
-
-
-        setChatModel();
-
-
-
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_chat, menu);
@@ -187,6 +205,23 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.sendLocation:
                 locationPlacesIntent();
                 break;
+            case R.id.action_black:
+                item.setChecked(true);
+                wallpaperImage.setBackgroundColor(getResources().getColor(R.color.blackColor));
+                break;
+            case R.id.action_red:
+                item.setChecked(true);
+                wallpaperImage.setBackgroundColor(getResources().getColor(R.color.redColorLight));
+                break;
+            case R.id.action_gray:
+                item.setChecked(true);
+                wallpaperImage.setBackgroundColor(getResources().getColor(R.color.dark_gray));
+
+                break;
+            case R.id.action_yellow:
+                item.setChecked(true);
+                wallpaperImage.setBackgroundColor(getResources().getColor(R.color.yellowColorLight));
+                break;
 
 
         }
@@ -201,32 +236,69 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         startActivityForResult(Intent.createChooser(intent, getString(R.string.select_picture_title)), IMAGE_GALLERY_REQUEST);
     }
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
     private void sendMessageFirebase(){
         Message message =new Message();
         message.setSenderID(currentUser);
         message.setText(edMessage.getText().toString());
         message.setTime(String.valueOf(Calendar.getInstance().getTimeInMillis()));
         message.setType("text");
-        message.setId(chat.getId());
-        DatabaseRefs.mMessagesDatabaseReference.child(chat.getId()).push().setValue(message);
-        if(contact != null){
-            reference.setValue(chat);
+
+        // send first message
+        if(getIntent().hasExtra(Util.FIRST_TIME_KEY)){
+            if(getIntent().getBooleanExtra(Util.FIRST_TIME_KEY,false)){
+                if(contact != null){
+                    chatID =contact.getChatID();
+                    DatabaseRefs.mChatsDatabaseReference.child(chatID).setValue(chat);
+                    message.setId(chat.getId());
+                    DatabaseRefs.mMessagesDatabaseReference.child(chat.getId()).push().setValue(message);
+                    if(chatID != null ) Log.v(TAG,"Chat Tag ID from Contact :" + chatID);
+                    createFirstTypingNode(chat);
+                }
+            }
+        }else{
+            message.setId(chat.getId());
+            DatabaseRefs.mMessagesDatabaseReference.child(chat.getId()).push().setValue(message);
         }
         mLinearLayoutManager.setStackFromEnd(true);
-
+        //rvListMessage.scrollToPosition(firebaseAdapter.getItemCount()-1);
         rvListMessage.setLayoutManager(mLinearLayoutManager);
-
         edMessage.setText(null);
     }
 
-    void setToolbarViews(){
+    void setToolbarViews(Contact contact){
+        title.setText(contact.getUserModel().getName());
+
+        try {
+            Glide.with(ChatActivity.this)
+                    .load(contact.getUserModel().getImageUrl())
+                    .into(imageProfile);
+        }catch (IllegalArgumentException ex){
+            Toast.makeText(getApplicationContext(),ex.getMessage(),Toast.LENGTH_LONG).show();
+        }
+    }
+
+    void setToolbarViews(Chat chat){
         DatabaseReference ref;
+        if(chat == null){
+            if(contact != null){
+                setToolbarViews(contact);
+                return;
+            }
+            Toast.makeText(getApplicationContext(),"No Chat",Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
         if(chat.getMember(0).equals(CurrentUser.getInstance().getUserModel().getId())){
             ref = DatabaseRefs.mUsersDatabaseReference.child(chat.getMember(1));
         }else{
             ref = DatabaseRefs.mUsersDatabaseReference.child(chat.getMember(0));
         }
-
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -235,8 +307,8 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
                 try {
                     Glide.with(ChatActivity.this)
-                        .load(model.getImageUrl())
-                        .into(imageProfile);
+                            .load(model.getImageUrl())
+                            .into(imageProfile);
                 }catch (IllegalArgumentException ex){
                     Toast.makeText(getApplicationContext(),ex.getMessage(),Toast.LENGTH_LONG).show();
                 }
@@ -264,6 +336,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
        mFirebaseDatabaseReference = DatabaseRefs.mMessagesDatabaseReference.child(chat.getId());
         final ChatFirebaseAdapter firebaseAdapter =
                 new ChatFirebaseAdapter(mFirebaseDatabaseReference, currentUser, chat);
+
         firebaseAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
             public void onItemRangeInserted(int positionStart, int itemCount) {
@@ -281,65 +354,53 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         rvListMessage.setAdapter(firebaseAdapter);
     }
 
-    private void setChatModel(){
 
-        currentUser = CurrentUser.getInstance().getUserModel().getId();
-        // From RecentChat Fragment
-        if(getIntent().hasExtra(Util.CHAT_KEY_MODEL)){
-
-            contact =null;
-            chatID= getIntent().getStringExtra(Util.CHAT_KEY_MODEL);
-            Log.v(TAG,chatID);
-
-
-            DatabaseRefs.mChatsDatabaseReference.child(chatID).addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    chat=  dataSnapshot.getValue(Chat.class);
-                    //setTitle(chat.getConversationName());
-                    setToolbarViews();
-
-                    loadMessagesFirebase(chat);
-
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-            // From Contacts Fragment
-        }else if(getIntent().hasExtra(Util.CONTACT_KEY_MODEL)){
-            contact = (Contact) getIntent().getSerializableExtra(Util.CONTACT_KEY_MODEL);
-            if(contact != null) Log.v(TAG,contact.toString());
-            userID =contact.getUserId();
-            Log.v(TAG,userID);
-            chat = new Chat();
-            chat.addMember(currentUser);
-            userID = contact.getUserId();
-            chat.addMember(contact.getUserId());
-            chat.setConversationName(contact.getContact_name());
-            chat.setGroup(false);
-            chat.setDateCreated(new SimpleDateFormat("dd/MM/yy HH:mm:ss").format(Calendar.getInstance().getTime()));
-            setToolbarViews();
-
-            loadMessagesFirebase(chat);
-
-            reference = DatabaseRefs.mChatsDatabaseReference.push();
-
-
-            chatID = reference.getKey();
-            chat.setId(chatID);
-            if(chatID != null ) Log.v(TAG,"Chat Tag ID from Contact :" + chatID);
-        }
+    private Chat createFirstChatNode(){
+        Chat chat = new Chat();
+        chat.addMember(currentUser);
+        //userID = contact.getUserModel().getId();
+        chat.setId(contact.getChatID());
+        chat.addMember(contact.getUserModel().getId());
+        chat.setConversationName(contact.getContact_name());
+        chat.setGroup(false);
+        chat.setDateCreated(new SimpleDateFormat("dd/MM/yy HH:mm:ss").format(Calendar.getInstance().getTime()));
+        setToolbarViews(contact);
+        return chat;
     }
 
+    private void createFirstTypingNode(Chat chat){
+
+        if(chat ==null){
+            Toast.makeText(getApplicationContext(),"There is a problem, please report it",Toast.LENGTH_LONG).show();
+            return;
+        }
+        Log.v(FullScreenImageActivity.class.getSimpleName(),"Set Child Typing");
+
+        for (String s : chat.getMembers()){
+            DatabaseRefs.mTypingDatabaseReference.child(chat.getId()).child(s).setValue(false);
+        }
+
+
+    }
+
+
     private void bindViews(){
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        imageProfile = (CircleImageView) findViewById(R.id.imageProfile);
+        title = (TextView) findViewById(R.id.title);
+        //setSupportActionBar(toolbar);
+        refreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeContiner);
         contentRoot = findViewById(R.id.contentRoot);
         edMessage = (EmojiconEditText)findViewById(R.id.editTextMessage);
         btSendMessage = (ImageView)findViewById(R.id.buttonMessage);
+        wallpaperImage = (ImageView) findViewById(R.id.img);
         btSendMessage.setOnClickListener(this);
         btEmoji = (ImageView)findViewById(R.id.buttonEmoji);
+        btAttach =(ImageView)findViewById(R.id.buttonAttach);
         emojIcon = new EmojIconActions(this,contentRoot,edMessage,btEmoji);
         emojIcon.ShowEmojIcon();
         rvListMessage = (RecyclerView)findViewById(R.id.messageRecyclerView);
@@ -347,6 +408,18 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         mLinearLayoutManager = new LinearLayoutManager(this);
         mLinearLayoutManager.setStackFromEnd(true);
         edMessage.addTextChangedListener(this);
+        // Configure the refreshing colors
+        refreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        this.finish();
     }
 
     @Override
@@ -354,12 +427,6 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         int id =view.getId();
         switch (id){
             case R.id.buttonMessage:
-                if(edMessage.getText().toString().isEmpty() || edMessage.getText() ==null){
-                    btSendMessage.setEnabled(false);
-                    return;
-                }else {
-                    btSendMessage.setEnabled(true);
-                }
                 sendMessageFirebase();
                 break;
             default:
@@ -442,6 +509,50 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+
+
+    private void onTypingState(){
+        try{
+            DatabaseRefs.mTypingDatabaseReference.child(chatID).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for(DataSnapshot snapshot :dataSnapshot.getChildren()){
+                        String key =snapshot.getKey();
+
+
+                        final boolean userTyping =snapshot.getValue(boolean.class);
+                        if(key == null){
+                            Log.v(TAG,"Object UserTyping is null");
+                        }else{
+
+                            Log.v(TAG,"Key is "+key);
+                            if(!key.equals(CurrentUser.getInstance().getUserModel().getId())){
+                                if(userTyping){
+                                    typingTextView.setVisibility(View.VISIBLE);
+                                    break;
+                                }else{
+                                    typingTextView.setVisibility(View.INVISIBLE);
+                                }
+                            }
+
+
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.v(TAG,"Canceling onDataChange Typing State");
+
+                }
+            });
+        } catch (RuntimeException ex){
+            //Toast.makeText(getApplicationContext(),ex.getMessage(),Toast.LENGTH_SHORT).show();
+            Log.e(TAG,ex.getMessage());
+        }
+    }
+
+
     @Override
     public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -450,35 +561,57 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-        typingTextView.setVisibility(View.VISIBLE);
+        Log.v(FullScreenImageActivity.class.getSimpleName(),"Start Typing Transaction");
+
+        try{
+            if(charSequence.length() >0){
+                btSendMessage.setEnabled(true);
+                DatabaseRefs.mTypingDatabaseReference.child(chatID).child(CurrentUser.getInstance().getUserModel().getId()).runTransaction(new Transaction.Handler() {
+                    @Override
+                    public Transaction.Result doTransaction(MutableData mutableData) {
+                        boolean typing;
+                        typing =true;
+                        mutableData.setValue(typing);
+                        return Transaction.success(mutableData);
+                    }
+
+                    @Override
+                    public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                        Log.v(FullScreenImageActivity.class.getSimpleName(),"Complete Transaction");
+
+                    }
+                });
+            }else{
+                btSendMessage.setEnabled(false);
+                DatabaseRefs.mTypingDatabaseReference.child(chatID).child(CurrentUser.getInstance().getUserModel().getId()).runTransaction(new Transaction.Handler() {
+                    @Override
+                    public Transaction.Result doTransaction(MutableData mutableData) {
+                        boolean typing;
+                        typing =false;
+                        mutableData.setValue(typing);
+                        return Transaction.success(mutableData);
+                    }
+
+                    @Override
+                    public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                        Log.v(FullScreenImageActivity.class.getSimpleName(),"Complete Transaction");
+
+                    }
+                });
+            }
+        }catch (RuntimeException ex){
+            //Toast.makeText(getApplicationContext(),ex.getMessage(),Toast.LENGTH_SHORT).show();
+            Log.e(TAG,ex.getMessage());
+
+        }
 
 
     }
 
     @Override
     public void afterTextChanged(Editable editable) {
+        //Log.v(FullScreenImageActivity.class.getSimpleName(),"Start Transaction");
 
-
-        DatabaseRefs.mChatsDatabaseReference.child(chatID).runTransaction(new Transaction.Handler() {
-            @Override
-            public Transaction.Result doTransaction(MutableData mutableData) {
-                Chat chat = mutableData.getValue(Chat.class);
-                if (chat == null) {
-                    return Transaction.success(mutableData);
-                }
-                //title.setText(chat.getConversationName());
-                typingTextView.setVisibility(View.INVISIBLE);
-
-                chat.setTyping(false);
-                mutableData.setValue(chat);
-                return Transaction.success(mutableData);
-            }
-
-            @Override
-            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-
-            }
-        });
 
     }
 }
