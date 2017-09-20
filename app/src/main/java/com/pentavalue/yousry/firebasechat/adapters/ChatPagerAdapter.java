@@ -5,6 +5,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
 import com.pentavalue.yousry.firebasechat.fragments.ContactFragment;
+import com.pentavalue.yousry.firebasechat.fragments.GroupChatFragment;
 import com.pentavalue.yousry.firebasechat.fragments.LoginFragment;
 import com.pentavalue.yousry.firebasechat.fragments.RecentChatFragment;
 
@@ -14,8 +15,8 @@ import com.pentavalue.yousry.firebasechat.fragments.RecentChatFragment;
 
 public class ChatPagerAdapter extends FragmentPagerAdapter {
 
-    final int PAGE_COUNT = 3;
-    private String tabTitles[] = new String[] { "Chat", "Groups", "Contacts" };
+    final int PAGE_COUNT = 2;
+    private String tabTitles[] = new String[] { "Chat", "Contacts" };
 
     public ChatPagerAdapter(FragmentManager fm) {
         super(fm);
@@ -26,9 +27,7 @@ public class ChatPagerAdapter extends FragmentPagerAdapter {
         switch (position) {
             case 0: // Fragment # 0 - This will show FirstFragment
                 return RecentChatFragment.newInstance();
-            case 1: // Fragment # 0 - This will show FirstFragment different title
-                return LoginFragment.newInstance();
-            case 2: // Fragment # 1 - This will show SecondFragment
+            case 1: // Fragment # 1 - This will show SecondFragment
                 return ContactFragment.newInstance();
             default:
                 return null;

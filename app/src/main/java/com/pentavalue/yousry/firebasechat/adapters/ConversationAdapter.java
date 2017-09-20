@@ -1,7 +1,6 @@
 
 package com.pentavalue.yousry.firebasechat.adapters;
 
-import android.nfc.Tag;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -10,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -19,13 +17,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.pentavalue.yousry.firebasechat.R;
-import com.pentavalue.yousry.firebasechat.holders.RecentChatHolder;
-import com.pentavalue.yousry.firebasechat.interfaces.ClickListenerChatFirebase;
 import com.pentavalue.yousry.firebasechat.models.Chat;
-import com.pentavalue.yousry.firebasechat.models.CurrentUser;
 import com.pentavalue.yousry.firebasechat.models.Message;
-import com.pentavalue.yousry.firebasechat.models.MessageModel;
-import com.pentavalue.yousry.firebasechat.models.PrivateRoomChat;
 import com.pentavalue.yousry.firebasechat.models.UserModel;
 import com.pentavalue.yousry.firebasechat.util.CircleTransform;
 import com.pentavalue.yousry.firebasechat.util.DatabaseRefs;
@@ -40,9 +33,9 @@ import hani.momanii.supernova_emoji_library.Helper.EmojiconTextView;
  * Created by Alessandro Barreto on 23/06/2016.
  */
 
-public class ChatFirebaseAdapter extends FirebaseRecyclerAdapter<Message,ChatFirebaseAdapter.MyChatViewHolder> {
+public class ConversationAdapter extends FirebaseRecyclerAdapter<Message,ConversationAdapter.MyChatViewHolder> {
 
-    public static final String TAG = ChatFirebaseAdapter.class.getSimpleName();
+    public static final String TAG = ConversationAdapter.class.getSimpleName();
     private static final int RIGHT_MSG = 0;
     private static final int LEFT_MSG = 1;
     private static final int RIGHT_MSG_IMG = 2;
@@ -63,8 +56,8 @@ public class ChatFirebaseAdapter extends FirebaseRecyclerAdapter<Message,ChatFir
 
 
 
-    public ChatFirebaseAdapter(DatabaseReference ref, String mCurrentUser, Chat chat) {
-        super(Message.class, R.layout.item_message_left, ChatFirebaseAdapter.MyChatViewHolder.class, ref);
+    public ConversationAdapter(DatabaseReference ref, String mCurrentUser, Chat chat) {
+        super(Message.class, R.layout.item_message_left, ConversationAdapter.MyChatViewHolder.class, ref);
         this.idUser = mCurrentUser;
         this.chat =chat;
         Log.v(TAG,"User ID = " +idUser);

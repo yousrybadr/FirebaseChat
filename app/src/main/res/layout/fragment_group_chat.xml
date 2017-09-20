@@ -1,0 +1,90 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/whiteColor"
+    tools:context="com.pentavalue.yousry.firebasechat.fragments.GroupChatFragment">
+
+    <android.support.v7.widget.Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@color/dark_gray"
+        android:layout_alignParentTop="true"
+        android:id="@+id/toolbar"
+        >
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/backImageButton"
+            android:background="@drawable/select_toolbar_group"
+            android:src="@drawable/icon_back"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textColor="@color/whiteColor"
+            android:text="Create Group"
+            android:gravity="center"
+            android:clickable="true"
+            android:background="@drawable/select_toolbar_group"
+            android:paddingRight="10dp"
+            android:textAllCaps="true"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:drawableRight="@drawable/icon_checkmark"
+             />
+
+    </android.support.v7.widget.Toolbar>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/toolbar"
+
+        >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/root1"
+            android:orientation="horizontal">
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:clickable="true"
+                android:background="@drawable/select_image_group"
+                android:layout_marginTop="@dimen/margin_twenty"
+                android:layout_marginBottom="@dimen/margin_twenty"
+                android:layout_marginRight="@dimen/margin_ten"
+                android:layout_marginLeft="@dimen/margin_ten"
+                app:civ_border_color="@color/dark_gray"
+                app:civ_border_width="1dp"
+                android:src="@drawable/orca_attach_camera_normal"
+                android:id="@+id/take_imageView_group"
+                />
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:hint="@string/editText_hint"
+                android:textColorHint="@color/dark_gray"
+                android:textColor="@color/blackColor"
+                android:inputType="text"
+                android:id="@+id/name_editText_group"
+                />
+        </LinearLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/root1">
+            <android.support.v7.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/recyclerGroup"
+                android:background="@color/off_white"
+                >
+
+            </android.support.v7.widget.RecyclerView>
+        </RelativeLayout>
+    </RelativeLayout>
+
+</RelativeLayout>

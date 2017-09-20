@@ -15,11 +15,12 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/button2"
         android:gravity="center"
         android:text="Test"
         android:id="@+id/textView"
         android:isScrollContainer="true"
-        android:textSize="25sp"/>
+        android:textSize="25sp"
+        android:layout_below="@+id/button2" />
+
 
 </RelativeLayout>

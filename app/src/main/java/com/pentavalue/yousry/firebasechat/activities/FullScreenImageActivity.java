@@ -7,6 +7,8 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CheckedTextView;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,6 +28,8 @@ import java.util.List;
 
 public class FullScreenImageActivity extends AppCompatActivity {
 
+
+    CheckedTextView checkedTextView;
     private static final String Tag = FullScreenImageActivity.class.getSimpleName();
     String chatID;
     TextView textView;
@@ -43,43 +47,11 @@ public class FullScreenImageActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         textView = (TextView) findViewById(R.id.textView);
         button = (Button) findViewById(R.id.button2);
-
+        //checkedTextView = (CheckedTextView) findViewById(R.id.checkedTextView);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.v(FullScreenImageActivity.class.getSimpleName(),"Set Child Typing");
 
-                Log.v(Tag,"Key 1 : "+ DatabaseRefs.mChatsDatabaseReference.child(chatID).getKey());
-                Log.v(Tag,"Key 2 : "+ DatabaseRefs.mChatsDatabaseReference.getKey());
-                Log.v(Tag,"Key 3 : "+ DatabaseRefs.mChatsDatabaseReference.child("members").child("0").getKey());
-                Log.v(Tag,"Key 4 : "+ DatabaseRefs.mChatsDatabaseReference.equalTo("members").getRef().getKey());
-                Log.v(Tag,"Key 5 : "+ DatabaseRefs.mChatsDatabaseReference.child(chatID).child("members").getKey());
-
-                DatabaseReference ref =DatabaseRefs.mChatsDatabaseReference.child(chatID);
-                ref.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if(dataSnapshot != null){
-                            for( DataSnapshot snapshot : dataSnapshot.getChildren()){
-                                String member = snapshot.getValue(String.class);
-                                if(member == null){
-                                    Log.v(Tag,"members is null");
-                                }
-                                else{
-                                    Log.v(Tag,"members Count" + member);
-                                }
-                            }
-
-                        }else{
-                            Log.v(Tag,"snap = null");
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
 
             }
         });
@@ -95,5 +67,14 @@ public class FullScreenImageActivity extends AppCompatActivity {
     }
 
 
-
+    boolean checked =false;
+    public void onClick(View view) {
+        if(!checked){
+            checkedTextView.setChecked(true);
+            checked =true;
+        }else{
+            checkedTextView.setChecked(false);
+            checked =false;
+        }
+    }
 }

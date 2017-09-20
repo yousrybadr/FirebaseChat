@@ -41,6 +41,7 @@
     <string name="api_key_google_places">AIzaSyA6JKKD-PdKdtp4eyALp4VSsYleeSBp79g</string>
     <string name="sendLocation">Send Location</string>
     <string name="locationTo">Location To</string>
+    <string name="editText_hint">Name (ex: Family)</string>
 
 
 </resources>

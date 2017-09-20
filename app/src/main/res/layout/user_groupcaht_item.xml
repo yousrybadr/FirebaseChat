@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:weightSum="1"
+    android:orientation="horizontal"
+    android:id="@+id/root"
+    android:background="@drawable/select_image_group"
+    android:layout_height="60dp">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/image"
+        android:layout_marginRight="@dimen/margin_five"
+        android:layout_marginLeft="@dimen/margin_five"
+        android:layout_marginBottom="@dimen/margin_five"
+        android:layout_marginTop="@dimen/margin_five"
+        android:layout_weight="0.4"
+        android:src="@drawable/icon_user"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/name"
+        android:layout_weight="0.15"
+        android:gravity="center|left"
+        android:textColor="@color/blackColor"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:text="TEST"/>
+
+    <CheckBox
+        android:id="@+id/checkbox"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:buttonTint="@color/select_checkbox"
+
+        android:clickable="false"
+        android:layout_weight="0.45"
+        style="@style/Base.Widget.AppCompat.CompoundButton.CheckBox"
+        android:gravity="center_horizontal|center_vertical" />
+
+
+</LinearLayout>

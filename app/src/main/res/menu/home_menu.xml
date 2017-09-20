@@ -3,10 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:title="Create Group"
+        android:icon="@drawable/icon_group_white"
+        android:id="@+id/action_add_group"
+        android:onClick="onCreateGroup"
+        app:showAsAction="never">
+
+    </item>
+    <item
         android:title="Sign out"
+        android:icon="@drawable/icon_logout"
         android:id="@+id/action_sign_out"
         android:onClick="onSignOut"
-        app:showAsAction="withText">
+        app:showAsAction="never">
 
     </item>
 </menu>

@@ -15,6 +15,7 @@ import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.pentavalue.yousry.firebasechat.R;
 import com.pentavalue.yousry.firebasechat.adapters.ChatPagerAdapter;
+import com.pentavalue.yousry.firebasechat.fragments.GroupChatFragment;
 import com.pentavalue.yousry.firebasechat.models.CurrentUser;
 
 import butterknife.BindView;
@@ -71,5 +72,9 @@ public class HomeActivity extends AppCompatActivity {
         FirebaseAuth.getInstance().signOut();
         startActivity(new Intent(this,StartActivity.class));
         finish();
+    }
+
+    public void onCreateGroup(MenuItem item) {
+        startActivity(new Intent(HomeActivity.this, GroupChatFragment.class));
     }
 }

@@ -2,8 +2,6 @@ package com.pentavalue.yousry.firebasechat.fragments;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -15,22 +13,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 import com.pentavalue.yousry.firebasechat.R;
 import com.pentavalue.yousry.firebasechat.activities.ChatActivity;
-import com.pentavalue.yousry.firebasechat.adapters.ChatFirebaseAdapter;
-import com.pentavalue.yousry.firebasechat.adapters.ContactAdapter;
-import com.pentavalue.yousry.firebasechat.adapters.RecentChatAdapter;
+import com.pentavalue.yousry.firebasechat.adapters.UserListAdapter;
 import com.pentavalue.yousry.firebasechat.holders.RecentChatHolder;
 import com.pentavalue.yousry.firebasechat.models.Chat;
-import com.pentavalue.yousry.firebasechat.models.Contact;
 import com.pentavalue.yousry.firebasechat.models.CurrentUser;
 import com.pentavalue.yousry.firebasechat.models.UserModel;
 import com.pentavalue.yousry.firebasechat.util.DatabaseRefs;
@@ -68,10 +57,8 @@ public class RecentChatFragment extends Fragment {
 
     Unbinder unbinder ;
 
-    DatabaseReference reference = DatabaseRefs.mUsersDatabaseReference;
 
 
-    RecentChatAdapter recentChatAdapter;
 
     public RecentChatFragment() {
         // Required empty public constructor
@@ -163,7 +150,8 @@ public class RecentChatFragment extends Fragment {
                     view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recent_chat_item,parent,false);
                     return new RecentChatHolder(view);
                 }else{
-                    return null;
+                    view =LayoutInflater.from(parent.getContext()).inflate(R.layout.empty_item,parent,false);
+                    return new RecentChatHolder(view);
                 }
             }
 
@@ -171,23 +159,29 @@ public class RecentChatFragment extends Fragment {
             protected void populateViewHolder(final RecentChatHolder viewHolder, final Chat model, final int position) {
                 final DatabaseReference chatRef = getRef(position);
 
-                if(CurrentUser.getInstance().getUserModel() ==null){
+
+                if(getItemViewType(position) == REMOVED_ITEM){
                     return;
+                }else{
+                    if(CurrentUser.getInstance().getUserModel() ==null){
+                        return;
+                    }
+                    final String chatRefKey = chatRef.getKey();
+                    viewHolder.bind(model,getContext());
+                    viewHolder.item_chat.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            // Launch PostDetailActivity
+                            Intent intent = new Intent(getActivity(), ChatActivity.class)
+                                    .putExtra(Util.CHAT_KEY_MODEL,model.getId());
+                            //intent.putExtra(PostDetailActivity.EXTRA_POST_KEY, postKey);
+                            startActivity(intent);
+
+                        }
+                    });
+
                 }
                 // Set click listener for the whole post view
-                final String chatRefKey = chatRef.getKey();
-                viewHolder.bind(model,getContext());
-                viewHolder.item_chat.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        // Launch PostDetailActivity
-                        Intent intent = new Intent(getActivity(), ChatActivity.class)
-                                .putExtra(Util.CHAT_KEY_MODEL,model.getId());
-                        //intent.putExtra(PostDetailActivity.EXTRA_POST_KEY, postKey);
-                        startActivity(intent);
-
-                    }
-                });
 
 
 
