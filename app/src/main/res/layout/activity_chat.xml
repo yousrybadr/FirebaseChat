@@ -6,15 +6,78 @@
     android:id="@+id/contentRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:weightSum="1"
+    android:background="@color/off_white"
     android:orientation="vertical"
     >
 
     <android.support.v7.widget.Toolbar
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="35dp"
+        android:visibility="gone"
+        android:id="@+id/action_toolbar"
+        android:background="@color/darkColorDark">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:weightSum="25">
+
+            <ImageButton
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/replay_toolbar"
+                android:scaleType="fitCenter"
+                android:src="@drawable/icon_reply_arrow_white"
+                android:background="@color/darkColorDark"
+                android:layout_weight="5"/>
+            <ImageButton
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/star_toolbar"
+                android:scaleType="fitCenter"
+
+                android:src="@drawable/icon_star_fill_white"
+                android:background="@color/darkColorDark"
+
+                android:layout_weight="5"/>
+            <ImageButton
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/delete_toolbar"
+                android:scaleType="fitCenter"
+
+                android:src="@drawable/icon_trash_white"
+                android:background="@color/darkColorDark"
+
+                android:layout_weight="5"/>
+            <ImageButton
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/copy_toolbar"
+                android:scaleType="fitCenter"
+
+                android:src="@drawable/icon_copy_white"
+                android:background="@color/darkColorDark"
+
+                android:layout_weight="5"/>
+            <ImageButton
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/forward_toolbar"
+                android:scaleType="fitCenter"
+                android:src="@drawable/icon_forward_arrow_white"
+                android:background="@color/darkColorDark"
+
+                android:layout_weight="5"/>
+        </LinearLayout>
+    </android.support.v7.widget.Toolbar>
+    <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:background="@color/ForeSystemColor"
         android:layout_width="match_parent"
-
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true">
         <de.hdodenhof.circleimageview.CircleImageView
             xmlns:app="http://schemas.android.com/apk/res-auto"
             android:id="@+id/imageProfile"
@@ -35,10 +98,7 @@
             android:textStyle="bold"
             android:paddingLeft="20dp"
             android:paddingRight="20dp"
-
-
             android:textColor="@color/text_blue_selector"/>
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -55,39 +115,46 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+
+        android:layout_gravity="top"
+        android:layout_weight="1"
+        >
 
         <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
             android:saveEnabled="false"
             android:id="@+id/img"
             />
 
 
         <android.support.v4.widget.SwipeRefreshLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+
             android:id="@+id/swipeContiner">
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/messageRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_marginTop="@dimen/margin_five"
+                android:layout_marginBottom="3dp"
                 android:scrollbars="none" />
         </android.support.v4.widget.SwipeRefreshLayout>
 
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="4dp"
+            android:layout_height="10dp"
             android:layout_gravity="bottom"
             android:background="@drawable/shadow_top" />
     </FrameLayout>
 
-    <RelativeLayout
+    <!--<RelativeLayout
         android:background="#fff"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:backgroundTint="@color/FontSystemColor"
         android:padding="2dp">
         <ImageView
             android:id="@+id/buttonEmoji"
@@ -112,7 +179,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/editTextMessage"
-            android:textColor="@color/blackColor"
+            android:textColor="@color/whiteColor"
             android:layout_toStartOf="@+id/buttonMessage"
             android:layout_toRightOf="@+id/buttonAttach"
             android:layout_toEndOf="@+id/buttonAttach"
@@ -127,5 +194,137 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
             />
+    </RelativeLayout> -->
+    <TextView
+        android:id="@+id/time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/input_holder"
+        android:layout_centerHorizontal="true"
+        android:textSize="20sp"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:textColor="@color/blackColor"
+        android:layout_marginBottom="@dimen/margin_twenty"
+        android:text="00:00:00"
+
+        android:visibility="gone" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="5"
+        android:background="#fff"
+        android:backgroundTint="@color/dark_gray"
+        android:padding="2dp">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:layout_above="@+id/input_holder"
+            android:layout_gravity="bottom"
+            android:layout_alignTop="@id/input_holder"
+            android:background="@color/blackColor" />
+
+        <com.dewarder.holdinglibrary.HoldingButtonLayout
+            android:id="@+id/input_holder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:hbl_cancel_icon="@android:drawable/ic_menu_close_clear_cancel"
+            app:hbl_holding_view="@+id/start_record"
+            app:hbl_icon="@drawable/icon_microphone_recorder"
+            app:hbl_radius="20dp"
+            app:hbl_second_radius="30dp">
+
+            <LinearLayout
+                android:id="@+id/slide_to_cancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|end"
+                android:layout_marginEnd="@dimen/margin_ten"
+                android:layout_marginRight="@dimen/margin_ten"
+                android:gravity="center_vertical"
+                android:visibility="invisible">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/margin_ten"
+                    android:layout_marginRight="@dimen/margin_ten"
+                    android:scaleType="center"
+                    android:src="@drawable/icon_back" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cancel" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center_horizontal"
+                android:gravity="center"
+                android:minHeight="50dp"
+                android:orientation="horizontal">
+
+                <RelativeLayout
+                    android:id="@+id/input"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="2dp">
+
+                    <ImageView
+                        android:id="@+id/buttonEmoji"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_alignBottom="@+id/editTextMessage"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
+                        android:padding="4dp"
+                        android:src="@drawable/icon_happy" />
+
+                    <ImageView
+                        android:id="@+id/buttonAttach"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_toRightOf="@+id/buttonEmoji"
+                        android:layout_alignBottom="@+id/editTextMessage"
+
+                        android:padding="4dp"
+                        android:src="@drawable/icon_attach" />
+
+                    <hani.momanii.supernova_emoji_library.Helper.EmojiconEditText
+                        android:id="@+id/editTextMessage"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:layout_toEndOf="@+id/buttonAttach"
+                        android:textColor="@color/blackColor"
+                        emojicon:emojiconSize="28sp" />
+
+
+                </RelativeLayout>
+                <ImageView
+                    android:id="@+id/buttonMessage"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center"
+                    android:padding="4dp"
+                    android:src="@android:drawable/ic_menu_send"
+                    android:contentDescription="SendMessage" />
+                <ImageView
+                    android:id="@+id/start_record"
+                    android:layout_width="60dp"
+
+                    android:layout_height="match_parent"
+                    android:scaleType="center"
+                    android:src="@drawable/icon_microphone_recorder" />
+
+            </LinearLayout>
+
+        </com.dewarder.holdinglibrary.HoldingButtonLayout>
     </RelativeLayout>
 </LinearLayout>

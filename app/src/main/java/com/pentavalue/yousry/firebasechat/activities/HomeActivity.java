@@ -7,14 +7,18 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.astuetz.PagerSlidingTabStrip;
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
+import com.miguelcatalan.materialsearchview.MaterialSearchView;
 import com.pentavalue.yousry.firebasechat.R;
 import com.pentavalue.yousry.firebasechat.adapters.ChatPagerAdapter;
+import com.pentavalue.yousry.firebasechat.fragments.ContactFragment;
 import com.pentavalue.yousry.firebasechat.fragments.GroupChatFragment;
 import com.pentavalue.yousry.firebasechat.models.CurrentUser;
 
@@ -31,6 +35,8 @@ public class HomeActivity extends AppCompatActivity {
     @BindView(R.id.toolbar)
     Toolbar toolbar;
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,11 +44,13 @@ public class HomeActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
 
+        setTitle("");
         setSupportActionBar(toolbar);
         Glide.with(HomeActivity.this)
                 .load(CurrentUser.getInstance().getUserModel().getImageUrl())
                 .into(imageView);
         textView.setText(CurrentUser.getInstance().getUserModel().getName());
+
 
 
         // Get the ViewPager and set it's PagerAdapter so that it can display items
@@ -77,4 +85,6 @@ public class HomeActivity extends AppCompatActivity {
     public void onCreateGroup(MenuItem item) {
         startActivity(new Intent(HomeActivity.this, GroupChatFragment.class));
     }
+
+
 }

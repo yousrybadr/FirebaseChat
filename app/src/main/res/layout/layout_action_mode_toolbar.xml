@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.Toolbar
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="35dp"
+    android:background="@color/darkColorDark">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:weightSum="25">
+
+        <ImageButton
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/replay_toolbar"
+            android:scaleType="fitCenter"
+            android:src="@drawable/icon_reply_arrow_white"
+            android:background="@color/darkColorDark"
+            android:layout_weight="5"/>
+        <ImageButton
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/star_toolbar"
+            android:scaleType="fitCenter"
+
+            android:src="@drawable/icon_star_fill_white"
+            android:background="@color/darkColorDark"
+
+            android:layout_weight="5"/>
+        <ImageButton
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/delete_toolbar"
+            android:scaleType="fitCenter"
+
+            android:src="@drawable/icon_trash_white"
+            android:background="@color/darkColorDark"
+
+            android:layout_weight="5"/>
+        <ImageButton
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/copy_toolbar"
+            android:scaleType="fitCenter"
+
+            android:src="@drawable/icon_copy_white"
+            android:background="@color/darkColorDark"
+
+            android:layout_weight="5"/>
+        <ImageButton
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/forward_toolbar"
+            android:scaleType="fitCenter"
+            android:src="@drawable/icon_forward_arrow_white"
+            android:background="@color/darkColorDark"
+
+            android:layout_weight="5"/>
+    </LinearLayout>
+</android.support.v7.widget.Toolbar>

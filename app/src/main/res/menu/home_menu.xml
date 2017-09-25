@@ -7,9 +7,10 @@
         android:icon="@drawable/icon_group_white"
         android:id="@+id/action_add_group"
         android:onClick="onCreateGroup"
-        app:showAsAction="never">
+        app:showAsAction="always">
 
     </item>
+
     <item
         android:title="Sign out"
         android:icon="@drawable/icon_logout"

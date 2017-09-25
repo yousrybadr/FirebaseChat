@@ -127,7 +127,7 @@ public class SignUpFragment extends Fragment implements View.OnClickListener{
     private DatabaseReference mDatabase;
 
     private FirebaseStorage storage = FirebaseStorage.getInstance();
-    StorageReference storageRef = storage.getReferenceFromUrl(Util.URL_STORAGE_REFERENCE).child(Util.FOLDER_STORAGE_IMG);
+    StorageReference storageRef = DatabaseRefs.nImageStorage;
 
 
     public SignUpFragment() {
@@ -401,8 +401,8 @@ public class SignUpFragment extends Fragment implements View.OnClickListener{
         if (request_code == actionIntent.IMAGE_CAMERA_REQUEST) {
             //sendFileFirebase(storageRef, pictureURI, user.getUid());
         } else if (request_code == actionIntent.IMAGE_GALLERY_REQUEST) {
-            final String name = DateFormat.format("yyyy-MM-dd_hhmmss", new Date()).toString();
-            StorageReference imageGalleryRef = storageRef.child(name + "_gallery");
+            //final String name = DateFormat.format("yyyy-MM-dd_hhmmss", new Date()).toString();
+            StorageReference imageGalleryRef = DatabaseRefs.nImageOfUsersStorage.child(Util.getNameOfImageUser());
             sendFileFirebase(storageRef, pictureURI, imageGalleryRef, user.getUid());
         }
     }

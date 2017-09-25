@@ -5,6 +5,14 @@
     <!-- Buttons -->
     <string name="loginButton">Login</string>
 
+    <string-array name="query_suggestions">
+        <item>Android</item>
+        <item>Apple</item>
+        <item>iOS</item>
+        <item>SCALA</item>
+        <item>Ruby</item>
+        <item>JavaScript</item>
+    </string-array>
     <!-- TextViews -->
     <string name="textViewSplach">© 2017 Penta Value Co.</string>
     <!-- EditTexts -->
@@ -42,6 +50,8 @@
     <string name="sendLocation">Send Location</string>
     <string name="locationTo">Location To</string>
     <string name="editText_hint">Name (ex: Family)</string>
+    <string name="removeGroup">Remove Group</string>
+    <string name="addMember">Add Member</string>
 
 
 </resources>

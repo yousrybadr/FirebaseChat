@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    <item
+        android:id="@+id/action_select"
+        android:actionLayout="@layout/layout_select_button"
+        android:title="Select"
+        app:showAsAction="always">
+
+    </item>
+
+    <item
+        android:id="@+id/action_reply"
+        android:icon="@drawable/icon_reply_arrow_white"
+        android:title="Reply"
+        app:showAsAction="always">
+
+    </item>
+
+    <item
+        android:id="@+id/action_star"
+        android:icon="@drawable/icon_star_fill_white"
+        android:title="Star"
+        app:showAsAction="ifRoom">
+
+    </item>
+    <item
+        android:id="@+id/action_trash"
+        android:icon="@drawable/icon_trash_white"
+        android:title="Delete"
+        app:showAsAction="ifRoom">
+
+    </item>
+    <item
+        android:id="@+id/action_copy"
+        android:icon="@drawable/icon_copy_white"
+        android:title="Copy"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_forward"
+        android:icon="@drawable/icon_forward_arrow_white"
+        android:title="Forward"
+        app:showAsAction="ifRoom">
+
+    </item>
+
+
+</menu>

@@ -11,6 +11,7 @@
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
         android:name=".util.MyApp"
@@ -67,7 +68,7 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDTT_0EClbhFGpN3WDLm2aBdu2JlUH4lSs" />
 
-        <activity android:name=".activities.FullScreenImageActivity">
+        <activity android:name=".activities.test.FullScreenImageActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

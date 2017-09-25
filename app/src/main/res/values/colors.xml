@@ -17,6 +17,7 @@
     <color name="FontSystemColor">#2196F3</color>
     <color name="ForeSystemColor">#1565C0</color>
 
+
     <color name="darkColorDark">#6A6A6A</color>
     <color name="greenColorLight">#0EEA0E</color>
     <color name="greenColorDark">#35902C</color>
@@ -24,6 +25,8 @@
     <color name="yellowColorDark">#E1DE13</color>
     <color name="redColorLight">#F0120B</color>
     <color name="redColorDark">#B60000</color>
+    <color name="startShadowRed">#d1F0120B</color>
+    <color name="endShadowRed">#adF0120B</color>
     <color name="whiteColor">#ffffff</color>
     <color name="blackColor">#000000</color>
 

@@ -44,6 +44,10 @@ dependencies {
     compile 'com.android.support:design:26.0.0-alpha1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.android.support:support-v4:26.+'
+    compile 'com.github.safetysystemtechnology:audio-recorder-button:v1.3'
+    compile 'com.dewarder:holdingbutton:0.0.9'
+    compile 'com.miguelcatalan:materialsearchview:1.4.0'
+
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
 }

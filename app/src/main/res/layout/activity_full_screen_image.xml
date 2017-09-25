@@ -1,26 +1,27 @@
-<?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.pentavalue.yousry.firebasechat.activities.FullScreenImageActivity">
+    tools:context=".activities.test.FullScreenImageActivity">
+
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="set child"
-        android:layout_alignParentStart="true"
-        android:id="@+id/button2" />
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:text="Test"
-        android:id="@+id/textView"
-        android:isScrollContainer="true"
-        android:textSize="25sp"
-        android:layout_below="@+id/button2" />
+        android:text="Start Action Mode"
+        android:background="@color/blackColor"
+        android:onClick="onStartActionModeClick"
+        android:textColor="@color/whiteColor"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="28dp"
+        android:layout_alignParentBottom="true"
+
+        android:layout_centerHorizontal="true" />
 
 
 </RelativeLayout>

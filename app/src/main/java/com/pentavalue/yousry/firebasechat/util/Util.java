@@ -10,6 +10,7 @@ import android.net.ConnectivityManager;
 import android.os.Build;
 import android.provider.ContactsContract;
 import android.support.v4.app.ActivityCompat;
+import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.widget.Toast;
@@ -18,6 +19,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.pentavalue.yousry.firebasechat.models.Contact;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -46,10 +48,39 @@ public class Util {
 
     public static final String FIRST_TIME_KEY ="first_time_key";
 
+    public static enum MESSAGE_TYPES {
+        FILE_TYPE,
+        IMAGE_TYPE,
+        MAP_TYPE,
+        AUDIO_TYPE,
+        VIDEO_TYPE,
+        TEXT_TYPE
+    }
 
 
+    /*public static enum MESSAGE_TYPES{
+        FILE_TYPE ("FILE_TYPE"),
+        IMAGE_TYPE ("IMAGE_TYPE"),
+        MAP_TYPE ("MAP_TYPE"),
+        AUDIO_TYPE ("AUDIO_TYPE"),
+        VIDEO_TYPE ("VIDEO_TYPE"),
+        TEXT_TYPE ("TEXT_TYPE");
+
+        String name;
+        private MESSAGE_TYPES(String name){
+            this.name =name;
+        }
+        public boolean equalsName(String otherName) {
+            // (otherName == null) check is not needed because name.equals(null) returns false
+            return name.equals(otherName);
+        }
+        public String toString() {
+            return this.name;
+        }
+    }*/
 
 
+    public static MESSAGE_TYPES TYPES;
 
 
     //Storage Constants
@@ -58,6 +89,29 @@ public class Util {
     public static final String FOLDER_STORAGE_VIDEO = "videos";
     public static final String FOLDER_STORAGE_DOCUMENT = "documents";
     public static final String FOLDER_STORAGE_AUDIO = "audioFiles";
+    public static final String FOLDER_STORAGE_IMG_USERS= "users";
+    public static final String FOLDER_STORAGE_IMG_MESSAGES = "messages";
+
+
+    private static String nameOfAudio ;
+    private static String nameOfImageMessage ;
+    private static String nameOfImageUser ;
+
+    public static String getNameOfAudio() {
+        nameOfAudio = android.text.format.DateFormat.format("yyyy-MM-dd_hhmmss", new Date()).toString() + "_audioFile";
+        return nameOfAudio;
+    }
+
+    public static String getNameOfImageMessage() {
+        nameOfImageMessage = DateFormat.format("yyyy-MM-dd_hhmmss", new Date()).toString() + "_messageImage";
+        return nameOfImageMessage;
+    }
+
+    public static String getNameOfImageUser() {
+        nameOfImageUser = DateFormat.format("yyyy-MM-dd_hhmmss", new Date()).toString() + "_userImage";
+        return nameOfImageUser;
+    }
+
     public static final String CHAT_KEY_MODEL = "CHAT_KEY_MODEL";
     public static final String CONTACT_KEY_MODEL = "CONTACT_KEY_MODEL";
 
@@ -78,6 +132,7 @@ public class Util {
     }
 
     public static String local(String latitudeFinal,String longitudeFinal){
+
         return "https://maps.googleapis.com/maps/api/staticmap?center="+latitudeFinal+","+longitudeFinal+"&zoom=18&size=280x280&markers=color:red|"+latitudeFinal+","+longitudeFinal;
     }
 

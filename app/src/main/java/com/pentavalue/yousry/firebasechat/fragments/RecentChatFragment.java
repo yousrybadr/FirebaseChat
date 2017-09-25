@@ -11,12 +11,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DatabaseReference;
 import com.pentavalue.yousry.firebasechat.R;
 import com.pentavalue.yousry.firebasechat.activities.ChatActivity;
+import com.pentavalue.yousry.firebasechat.activities.HomeActivity;
+import com.pentavalue.yousry.firebasechat.adapters.RecentChatAdapter;
 import com.pentavalue.yousry.firebasechat.adapters.UserListAdapter;
 import com.pentavalue.yousry.firebasechat.holders.RecentChatHolder;
 import com.pentavalue.yousry.firebasechat.models.Chat;
@@ -25,6 +28,7 @@ import com.pentavalue.yousry.firebasechat.models.UserModel;
 import com.pentavalue.yousry.firebasechat.util.DatabaseRefs;
 import com.pentavalue.yousry.firebasechat.util.Util;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -40,8 +44,10 @@ public class RecentChatFragment extends Fragment {
     private static final int VIEW_ITEM = 1;
 
     private List<Chat> chatList;
-
     private List<UserModel> userModels;
+
+    public @BindView(R.id.empty_view)
+    TextView emptyView;
     @BindView(R.id.swipeContainer)
     SwipeRefreshLayout refreshLayout;
     @BindView(R.id.recycler_view)
@@ -52,6 +58,8 @@ public class RecentChatFragment extends Fragment {
     // [END define_database_reference]
 
     private FirebaseRecyclerAdapter<Chat, RecentChatHolder> mAdapter;
+
+    private RecentChatAdapter recentChatAdapter;
     private LinearLayoutManager mManager;
 
 
@@ -85,6 +93,9 @@ public class RecentChatFragment extends Fragment {
         unbinder = ButterKnife.bind(this,view);
 
 
+        setRetainInstance(true);
+        chatList =new ArrayList<>();
+
         mDatabase = DatabaseRefs.mChatsDatabaseReference;
         // [END create_database_reference]
         Log.v(TAG,"Start Fragment : "+TAG);
@@ -116,6 +127,33 @@ public class RecentChatFragment extends Fragment {
                 android.R.color.holo_red_light);
 
 
+        // Set up Layout Manager, reverse layout
+        mManager = new LinearLayoutManager(getActivity());
+        //mManager.setReverseLayout(true);
+        //mManager.setStackFromEnd(true);
+        recyclerView.setLayoutManager(mManager);
+
+        // Set up FirebaseRecyclerAdapter with the Query
+        //Query postsQuery = getQuery(mDatabase);
+        recentChatAdapter =new RecentChatAdapter(mDatabase, getContext(), new RecentChatAdapter.OnSizeChanged() {
+            @Override
+            public void onSizeChanged(int size) {
+                if(size >0){
+                    emptyView.setVisibility(View.GONE);
+                }else {
+                    emptyView.setVisibility(View.VISIBLE);
+                    Toast.makeText(getContext(),"Size = " + size, Toast.LENGTH_SHORT).show();
+
+                }
+
+            }
+        });
+
+
+
+
+        recyclerView.setAdapter(recentChatAdapter);
+
         return view;
     }
 
@@ -123,84 +161,40 @@ public class RecentChatFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        // Set up Layout Manager, reverse layout
-        mManager = new LinearLayoutManager(getActivity());
-        mManager.setReverseLayout(true);
-        mManager.setStackFromEnd(true);
-        recyclerView.setLayoutManager(mManager);
 
-        // Set up FirebaseRecyclerAdapter with the Query
-        //Query postsQuery = getQuery(mDatabase);
-        mAdapter = new FirebaseRecyclerAdapter<Chat, RecentChatHolder>(Chat.class, R.layout.recent_chat_item,
+
+        /*mAdapter = new FirebaseRecyclerAdapter<Chat, RecentChatHolder>(Chat.class, R.layout.recent_chat_item,
                 RecentChatHolder.class, mDatabase) {
-            @Override
-            public int getItemViewType(int position) {
-                Chat model = getItem(position);
-                if(checkUser(model)){
-                    return VIEW_ITEM;
-                }else{
-                    return REMOVED_ITEM;
-                }
+            List<Chat> chats;
+
+
+            public List<Chat> getChats() {
+                return chats;
             }
 
-            @Override
-            public RecentChatHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-                View view;
-                if(viewType == VIEW_ITEM){
-                    view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recent_chat_item,parent,false);
-                    return new RecentChatHolder(view);
-                }else{
-                    view =LayoutInflater.from(parent.getContext()).inflate(R.layout.empty_item,parent,false);
-                    return new RecentChatHolder(view);
-                }
+            public void setChats(List<Chat> chats) {
+                this.chats = chats;
             }
 
+
+        };*/
+
+
+        /*recentChatAdapter.setSize(new RecentChatAdapter.OnSizeChanged() {
             @Override
-            protected void populateViewHolder(final RecentChatHolder viewHolder, final Chat model, final int position) {
-                final DatabaseReference chatRef = getRef(position);
-
-
-                if(getItemViewType(position) == REMOVED_ITEM){
-                    return;
+            public void onSizeChanged(int size) {
+                if(size == 0){
+                    emptyView.setVisibility(View.VISIBLE);
                 }else{
-                    if(CurrentUser.getInstance().getUserModel() ==null){
-                        return;
-                    }
-                    final String chatRefKey = chatRef.getKey();
-                    viewHolder.bind(model,getContext());
-                    viewHolder.item_chat.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            // Launch PostDetailActivity
-                            Intent intent = new Intent(getActivity(), ChatActivity.class)
-                                    .putExtra(Util.CHAT_KEY_MODEL,model.getId());
-                            //intent.putExtra(PostDetailActivity.EXTRA_POST_KEY, postKey);
-                            startActivity(intent);
-
-                        }
-                    });
-
+                    emptyView.setVisibility(View.GONE);
                 }
-                // Set click listener for the whole post view
-
-
-
             }
-        };
-        recyclerView.setAdapter(mAdapter);
+        });*/
+
     }
 
 
-    boolean checkUser(Chat model){
-        for(String item :model.getMembers()){
-            if(item.equals(CurrentUser.getInstance().getUserModel().getId())){
-                Log.v(RecentChatHolder.class.getSimpleName(),"User is TRUE");
-                return true;
-            }
-        }
-        Log.v(RecentChatHolder.class.getSimpleName(),"User is FALSE");
-        return false;
-    }
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);

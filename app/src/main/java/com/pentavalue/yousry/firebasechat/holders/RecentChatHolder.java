@@ -59,31 +59,48 @@ public class RecentChatHolder extends RecyclerView.ViewHolder {
 
     }
 
-    private void loadUserModel(Chat chat){
+    private void loadUserModel(final Chat chat){
         DatabaseReference ref;
-        if(chat.getMember(0).equals(CurrentUser.getInstance().getUserModel().getId())){
-            ref = DatabaseRefs.mUsersDatabaseReference.child(chat.getMember(1));
+        if(chat.isGroup()){
+            name.setText(chat.getConversationName());
+            if(chat.getLastMessage().length() > 50){
+                phone.setText(chat.getLastMessage().substring(0,49) + " ...");
+
+            }else{
+                phone.setText(chat.getLastMessage());
+            }
+            Glide.with(context).load(chat.getChatImage()).into(photo);
         }else{
-            ref = DatabaseRefs.mUsersDatabaseReference.child(chat.getMember(0));
+            if(chat.getMember(0).equals(CurrentUser.getInstance().getUserModel().getId())){
+                ref = DatabaseRefs.mUsersDatabaseReference.child(chat.getMember(1));
+            }else{
+                ref = DatabaseRefs.mUsersDatabaseReference.child(chat.getMember(0));
+            }
+
+            ref.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    UserModel model =dataSnapshot.getValue(UserModel.class);
+                    name.setText(model.getName());
+                    if(chat.getLastMessage().length() > 50){
+                        phone.setText(chat.getLastMessage().substring(0,49) + " ...");
+
+                    }else{
+                        phone.setText(chat.getLastMessage());
+                    }
+                    Glide.with(context)
+                            .load(model.getImageUrl())
+                            .into(photo);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Toast.makeText(context,databaseError.getMessage(),Toast.LENGTH_LONG).show();
+
+                }
+            });
         }
 
-        ref.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                UserModel model =dataSnapshot.getValue(UserModel.class);
-                name.setText(model.getName());
-                phone.setText(model.getPhone());
-                Glide.with(context)
-                        .load(model.getImageUrl())
-                        .into(photo);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(context,databaseError.getMessage(),Toast.LENGTH_LONG).show();
-
-            }
-        });
     }
 
 

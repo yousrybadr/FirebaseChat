@@ -4,27 +4,47 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.nfc.Tag;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.speech.RecognizerIntent;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.menu.ExpandedMenuView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
 
+import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.RuntimeExecutionException;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -33,7 +53,9 @@ import com.google.firebase.database.DatabaseException;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.miguelcatalan.materialsearchview.MaterialSearchView;
 import com.pentavalue.yousry.firebasechat.R;
+import com.pentavalue.yousry.firebasechat.activities.ChatActivity;
 import com.pentavalue.yousry.firebasechat.adapters.ContactAdapter;
 import com.pentavalue.yousry.firebasechat.adapters.SimpleSectionedRecyclerViewAdapter;
 import com.pentavalue.yousry.firebasechat.models.Chat;
@@ -49,28 +71,51 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import butterknife.BindDrawable;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import de.hdodenhof.circleimageview.CircleImageView;
+
+import static android.app.Activity.RESULT_OK;
 
 public class ContactFragment extends Fragment {
     public static final String TAG = ContactFragment.class.getSimpleName();
 
+    static List<String> names;
     static List<Contact> contactList;
+    static List<Contact> chatContacts;
+
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
 
+    DatabaseReference ref =DatabaseRefs.mChatsDatabaseReference;
+    @BindView(R.id.name_contact)
+    TextView name;
+    @BindView(R.id.phone_contact)
+    TextView phone;
+    @BindView(R.id.image_contact)
+    CircleImageView photo;
+    @BindView(R.id.invite_button_contact)
+    Button inviteButton;
+    @BindView(R.id.item_contact)
+    LinearLayout item_contact;
+    @BindView(R.id.cancel)
+    ImageButton cancelButton;
+    @BindView(R.id.viewFlipper)
+    ViewFlipper viewFlipper;
     @BindView(R.id.swipeContainer)
     SwipeRefreshLayout refreshLayout;
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
+    @BindView(R.id.search_view)
+    MaterialSearchView searchView;
+    @BindView(R.id.toolbar_container)
+    FrameLayout frameLayout;
 
-    static List<Contact> chatContacts;
+    @BindDrawable(R.drawable.icon_user)
+    Drawable drawable;
 
-    List<UserModel> userModels;
     Unbinder unbinder;
-
-    DatabaseReference reference = DatabaseRefs.mUsersDatabaseReference;
-
 
     ContactAdapter contactAdapter;
 
@@ -87,23 +132,7 @@ public class ContactFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-    }
-
-
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-    }
-
-
-    void loadOffline() {
-        Toast.makeText(getContext(), getResources().getString(R.string.no_internet_connection), Toast.LENGTH_SHORT).show();
-        showContacts();
-        contactAdapter = new ContactAdapter(contactList, getContext());
-        recyclerView.setAdapter(contactAdapter);
+        setHasOptionsMenu(true);
 
     }
 
@@ -113,6 +142,11 @@ public class ContactFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_contacts, container, false);
         unbinder = ButterKnife.bind(this, view);
 
+        viewFlipper.setDisplayedChild(0);
+
+        frameLayout.setVisibility(View.GONE);
+
+        names =new ArrayList<>();
         chatContacts = new ArrayList<>();
         contactList =new ArrayList<>();
 
@@ -165,6 +199,171 @@ public class ContactFragment extends Fragment {
         // Inflate the layout for this fragment
         return view;
     }
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // TODO Add your menu entries here
+        inflater.inflate(R.menu.fragment_search_menu, menu);
+        MenuItem item = menu.findItem(R.id.action_search);
+        searchView.setMenuItem(item);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == MaterialSearchView.REQUEST_VOICE && resultCode == RESULT_OK) {
+            ArrayList<String> matches = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+            if (matches != null && matches.size() > 0) {
+                String searchWrd = matches.get(0);
+                if (!TextUtils.isEmpty(searchWrd)) {
+                    searchView.setQuery(searchWrd, false);
+                }
+            }
+
+            return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        //((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
+        searchView.setVoiceSearch(true);
+
+        searchView.setSuggestions( names.toArray(new String[0]));
+
+        searchView.setCursorDrawable(R.drawable.custom_cursor);
+
+        searchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                //Do some magic
+
+                if(query == null || query.isEmpty()){
+                    return false;
+                }
+
+                final Contact contact =getSelectedNameFormContact(query);
+                if(contact == null){
+                    Toast.makeText(getContext(),"Contact is not exist",Toast.LENGTH_SHORT).show();
+
+                    viewFlipper.setDisplayedChild(0);
+                    return false;
+                }
+                viewFlipper.setDisplayedChild(1);
+                name.setText(contact.getContact_name());
+                phone.setText(contact.getPhone_number());
+                if(contact.getUserModel() != null && contact.isMessengerContact()){
+                    inviteButton.setVisibility(View.GONE);
+                    Glide.with(getContext()).load(contact.getUserModel().getImageUrl()).into(photo);
+                }else{
+                    photo.setImageDrawable(drawable);
+                    inviteButton.setVisibility(View.VISIBLE);
+
+                }
+                item_contact.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Log.v(TAG,contact.toString());
+                        if(contact.isMessengerContact()){
+                            if(contact.getChatID().isEmpty() || contact.getChatID() == null){
+                                ref = ref.push();
+                                String chatID =ref.getKey();
+                                contact.setChatID(chatID);
+                                startActivity(new Intent(getContext(), ChatActivity.class)
+                                        .putExtra(Util.CONTACT_KEY_MODEL,contact)
+                                        .putExtra(Util.FIRST_TIME_KEY,true)
+                                );
+                            }else{
+                                startActivity(new Intent(getContext(), ChatActivity.class)
+                                        .putExtra(Util.CHAT_KEY_MODEL,contact.getChatID())
+                                );
+                            }
+
+
+
+                        }
+                    }
+                });
+                inviteButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Uri uri = Uri.parse("smsto:"+contact.getPhone_number());
+
+
+                        Intent sendIntent = new Intent(Intent.ACTION_VIEW,uri);
+                        sendIntent.putExtra("sms_body", "http://www.pentavalue.com/home/invitation/downlaodapk.php");
+                        sendIntent.setType("vnd.android-dir/mms-sms");
+                        startActivity(sendIntent);
+                    }
+                });
+                cancelButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        name.setText(null);
+                        phone.setText(null);
+                        photo.setImageDrawable(drawable);
+                        viewFlipper.setDisplayedChild(0);
+                    }
+                });
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                //Do some magic
+                return false;
+            }
+        });
+
+        searchView.setOnSearchViewListener(new MaterialSearchView.SearchViewListener() {
+            @Override
+            public void onSearchViewShown() {
+                //Do some magic
+                frameLayout.setVisibility(View.VISIBLE);
+
+            }
+
+            @Override
+            public void onSearchViewClosed() {
+                //Do some magic
+                frameLayout.setVisibility(View.GONE);
+                //viewFlipper.setDisplayedChild(0);
+            }
+        });
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission is granted
+                //showContacts();
+                showContacts();
+            } else {
+                //Toast.makeText(this, "Until you grant the permission, we canot display the names", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 
     void checkIsMessengerOrNot() {
         chatContacts.clear();
@@ -213,7 +412,6 @@ public class ContactFragment extends Fragment {
         });
     }
 
-
     void loadInRecyclurView(){
         //This is the code to provide a sectioned list
         List<SimpleSectionedRecyclerViewAdapter.Section> sections =
@@ -252,7 +450,6 @@ public class ContactFragment extends Fragment {
         recyclerView.setAdapter(mSectionedAdapter);
     }
 
-
     void searchOnChats() {
         final String curUser = CurrentUser.getInstance().getUserModel().getId();
         //final List<Contact> contacts =contactList;
@@ -261,19 +458,33 @@ public class ContactFragment extends Fragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    Chat chat = snapshot.getValue(Chat.class);
-                    for (int i = 0; i < contactList.size(); i++) {
-                        if (contactList.get(i).isMessengerContact()) {
-                            if (chat.getMember(0).equals(curUser) && chat.getMember(1).equals(contactList.get(i).getUserModel().getId())) {
-                                contactList.get(i).setChatID(chat.getId());
-                            } else if (chat.getMember(1).equals(curUser) && chat.getMember(0).equals(contactList.get(i).getUserModel().getId())) {
-                                contactList.get(i).setChatID(chat.getId());
+                    try{
+                        Chat chat = snapshot.getValue(Chat.class);
+                        if(chat.getMembers().size() == 0){
+                            DatabaseRefs.mChatsDatabaseReference.child(chat.getId()).removeValue();
+                        }
+                        if(chat.getMembers().size() == 1){
+                            continue;
+                        }
+                        for (int i = 0; i < contactList.size(); i++) {
+                            if (contactList.get(i).isMessengerContact()) {
+                                if (chat.getMember(0).equals(curUser) && chat.getMember(1).equals(contactList.get(i).getUserModel().getId())) {
+                                    contactList.get(i).setChatID(chat.getId());
+                                } else if (chat.getMember(1).equals(curUser) && chat.getMember(0).equals(contactList.get(i).getUserModel().getId())) {
+                                    contactList.get(i).setChatID(chat.getId());
+                                }
                             }
                         }
+                    }catch (IndexOutOfBoundsException | RuntimeExecutionException | NullPointerException ex){
+                        Toast.makeText(getContext(),"Error : " +ex.getMessage(),Toast.LENGTH_SHORT).show();
                     }
-                }
-                loadInRecyclurView();
 
+                }
+                try{
+                    loadInRecyclurView();
+                }catch (NullPointerException | RuntimeExecutionException ex){
+                    Toast.makeText(getContext(),"Error :"+ex.getMessage(),Toast.LENGTH_SHORT).show();
+                }
 
 
             }
@@ -285,35 +496,6 @@ public class ContactFragment extends Fragment {
         });
     }
 
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-    }
-
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission is granted
-                //showContacts();
-                showContacts();
-            } else {
-                //Toast.makeText(this, "Until you grant the permission, we canot display the names", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-
-
     private void showContacts(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && getContext().checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
@@ -322,8 +504,15 @@ public class ContactFragment extends Fragment {
             // Android version is lesser than 6.0 or the permission is already granted.
             contactList = ReadAllContacts(getContext());
             Collections.sort(contactList);
+
+            for(Contact name : contactList){
+                names.add(name.getContact_name());
+            }
+
+
         }
     }
+
     public List<Contact> ReadAllContacts(Context context){
         List<Contact> contacts =new ArrayList<>();
 
@@ -364,5 +553,21 @@ public class ContactFragment extends Fragment {
         return contacts;
     }
 
+    void loadOffline() {
+        Toast.makeText(getContext(), getResources().getString(R.string.no_internet_connection), Toast.LENGTH_SHORT).show();
+        showContacts();
+        contactAdapter = new ContactAdapter(contactList, getContext());
+        recyclerView.setAdapter(contactAdapter);
+
+    }
+
+    private Contact getSelectedNameFormContact(String s){
+        for (Contact contact :contactList){
+            if(contact.getContact_name().equals(s)){
+                return contact;
+            }
+        }
+        return null;
+    }
 
 }

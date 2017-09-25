@@ -14,8 +14,11 @@ public class Chat {
     private String conversationName;
     private String dateCreated;
     private boolean isGroup;
+    private String lastMessage;
+    private String timeLastMessage;
     private String wallpaperURL;
     private List<String> members;
+    private String groupAdmin;
     private String id;
 
     public Chat() {
@@ -26,6 +29,9 @@ public class Chat {
         this.wallpaperURL = "https://firebasestorage.googleapis.com/v0/b/fir-library-81a54.appspot.com/o/images%2F2017-09-07_044310_gallery?alt=media&token=bf392434-ba25-4c6a-b28a-f6546933ed97";
         this.members = new ArrayList<>();
         this.id = "";
+        this.groupAdmin ="";
+        this.lastMessage ="";
+        this.timeLastMessage ="";
     }
 
     public void addMember(String userId){
@@ -42,8 +48,42 @@ public class Chat {
         }
         return null;
     }
+    public boolean removeMember(String user_id){
+        boolean check =false;
+        for(int i =0; i<members.size() ;i++){
+            if(members.get(i).equals(user_id)){
+                members.remove(i);
+                check =true;
+                break;
+            }
+        }
+        return check;
+    }
 
 
+    public String getLastMessage() {
+        return lastMessage;
+    }
+
+    public void setLastMessage(String lastMessage) {
+        this.lastMessage = lastMessage;
+    }
+
+    public String getTimeLastMessage() {
+        return timeLastMessage;
+    }
+
+    public void setTimeLastMessage(String timeLastMessage) {
+        this.timeLastMessage = timeLastMessage;
+    }
+
+    public String getGroupAdmin() {
+        return groupAdmin;
+    }
+
+    public void setGroupAdmin(String groupAdmin) {
+        this.groupAdmin = groupAdmin;
+    }
     public String getChatImage() {
         return chatImage;
     }
@@ -73,7 +113,7 @@ public class Chat {
     }
 
     public void setGroup(boolean isGroup) {
-        isGroup = isGroup;
+        this.isGroup = isGroup;
     }
 
     public String getWallpaperURL() {
@@ -118,6 +158,7 @@ public class Chat {
                 ", wallpaperURL='" + wallpaperURL + '\'' +
                 ", members=" + listToString() +
                 ", id='" + id + '\'' +
+                ", groupAdmin='" + groupAdmin + '\'' +
                 '}';
     }
 

@@ -15,6 +15,7 @@ import com.pentavalue.yousry.firebasechat.models.Chat;
 import com.pentavalue.yousry.firebasechat.models.UserModel;
 import com.pentavalue.yousry.firebasechat.models.UserSelectedModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -73,6 +74,21 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListHolder> {
 
     public UserSelectedModel getItemModelList(int position){
         return this.userSelectedModels.get(position);
+    }
+
+
+    public List<String> getUserSelectedModels(){
+        List<String> tmpList =new ArrayList<>();
+        if(this.userSelectedModels.size() >0){
+            for(UserSelectedModel model : userSelectedModels){
+                if(model.isSelected()){
+                    tmpList.add(model.getId());
+                }
+            }
+            return tmpList;
+        }else{
+            return null;
+        }
     }
     public interface OnItemCheckListener {
         void onItemCheck( UserListHolder holder, int pos);

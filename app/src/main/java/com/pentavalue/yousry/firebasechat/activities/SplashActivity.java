@@ -79,7 +79,7 @@ public class SplashActivity extends AppCompatActivity {
 
         mContentView = findViewById(R.id.imageSplash);
 
-        if(Util.verifyNetworkConnection(this)){
+        if(!Util.verifyNetworkConnection(this)){
             Toast.makeText(getApplicationContext(),getResources().getString(R.string.no_internet_connection),Toast.LENGTH_LONG).show();
             Snackbar snackbar = Snackbar
                     .make(mContentView, getResources().getString(R.string.no_internet_connection), Snackbar.LENGTH_LONG)
