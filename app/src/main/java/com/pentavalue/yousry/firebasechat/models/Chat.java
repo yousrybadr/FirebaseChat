@@ -1,5 +1,7 @@
 package com.pentavalue.yousry.firebasechat.models;
 
+import android.os.Parcelable;
+
 import com.google.firebase.database.GenericTypeIndicator;
 
 import java.util.ArrayList;
@@ -20,6 +22,7 @@ public class Chat {
     private List<String> members;
     private String groupAdmin;
     private String id;
+
 
     public Chat() {
         this.chatImage = "";

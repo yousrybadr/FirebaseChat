@@ -495,6 +495,11 @@ public class ConversationAdapter extends FirebaseRecyclerAdapter<Message, Conver
     }
 
 
+    private void favoriteMessage(List<Message> messages){
+        
+    }
+
+
 
 }
 

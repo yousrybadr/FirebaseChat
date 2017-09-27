@@ -2,15 +2,17 @@ package com.pentavalue.yousry.firebasechat.activities;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -75,6 +77,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -88,29 +91,30 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     private static final int IMAGE_GALLERY_REQUEST = 1;
     private static final int IMAGE_CAMERA_REQUEST = 2;
     private static final int PLACE_PICKER_REQUEST = 3;
-
-
+    // Voice Reco (RECORD_AUDIO)
+    private static final java.text.DateFormat mFormatter = new SimpleDateFormat("mm:ss:SS");
+    private static final float SLIDE_TO_CANCEL_ALPHA_MULTIPLIER = 2.5f;
+    private static final long TIME_INVALIDATION_FREQUENCY = 50L;
     // Selection Mode
     static List<Message> selectedMessages;
-    ActionMode mActionMode;
-    Menu context_menu;
     static Button notifCount;
     static int mNotifCount = 0;
+    private static String mFileName = null;
+    ActionMode mActionMode;
+    Menu context_menu;
+    boolean isGroup = false;
     //Listeners
     private OnGroupListener onGroupListener;
     private OnChatDataChanged onChatDataChanged;
     // Firebase
     private DatabaseReference mFirebaseDatabaseReference;
     private FirebaseStorage storage = FirebaseStorage.getInstance();
-
-    boolean isGroup = false;
     //models Classes
     private Chat chat;
     private Contact contact;
     private LoadingDialog dialog;
     private String currentUser;
     private String chatID;
-
     //Views UI
     private Menu mOptionsMenu;
     private TextView typingTextView;
@@ -126,13 +130,6 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     private View contentRoot;
     private EmojIconActions emojIcon;
     private SwipeRefreshLayout refreshLayout;
-
-
-    // Voice Reco (RECORD_AUDIO)
-    private static final java.text.DateFormat mFormatter = new SimpleDateFormat("mm:ss:SS");
-    private static final float SLIDE_TO_CANCEL_ALPHA_MULTIPLIER = 2.5f;
-    private static final long TIME_INVALIDATION_FREQUENCY = 50L;
-    private static String mFileName = null;
     private String mNameOfFile = "";
     private MediaRecorder mRecorder;
     private HoldingButtonLayout mHoldingButtonLayout;
@@ -145,9 +142,73 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     private ViewPropertyAnimator mInputAnimator;
     private long mStartTime;
     private Runnable mTimerRunnable;
-    File audioFile;
-    MediaPlayer mPlayer;
-    Handler seekHandler = new Handler();
+    private File audioFile;
+    private MediaPlayer mPlayer;
+    private Handler seekHandler = new Handler();
+    private ActionMode.Callback mActionModeCallback =new ActionMode.Callback() {
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            // Inflate a menu resource providing context menu items
+            MenuInflater inflater = mode.getMenuInflater();
+            inflater.inflate(R.menu.menu_multi_select, menu);
+            View count = menu.findItem(R.id.action_select).getActionView();
+            notifCount = (Button) count.findViewById(R.id.notif_count);
+
+            context_menu = menu;
+            return true;
+        }
+
+
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false; // Return false if nothing is done
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.action_trash:
+                    Toast.makeText(getApplicationContext(),""+selectedMessages.size(),Toast.LENGTH_SHORT).show();
+                    //alertDialogHelper.showAlertDialog("","Delete Contact","DELETE","CANCEL",1,false);
+                    return true;
+                case R.id.action_forward:
+                    Intent intent =new Intent(ChatActivity.this , ForwardActivity.class);
+                    startActivityForResult(intent, 1212);
+                    return true;
+                case R.id.action_copy:
+                    String text ="";
+                    for( Message message :selectedMessages){
+                        if(message.getType().equals(Util.MESSAGE_TYPES.TEXT_TYPE.name()) ){
+                            text += "{ "+message.getText()+" }\n";
+                        }
+
+                    }
+                    ClipboardManager cm = (ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
+                    ClipData cData = ClipData.newPlainText("text", text);
+                    cm.setPrimaryClip(cData);
+                    mActionModeCallback.onDestroyActionMode(mActionMode);
+                    Toast.makeText(getApplicationContext(),"Copied", Toast.LENGTH_SHORT).show();
+
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            if(selectedMessages.size() >= 0){
+                selectedMessages.clear();
+                loadMessagesFirebase(chat);
+
+            }
+            mode.finish();
+
+            //Toast.makeText(getApplicationContext(),"Destory",Toast.LENGTH_SHORT).show();
+            mActionMode = null;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -155,7 +216,6 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         getWindow().requestFeature(Window.FEATURE_ACTION_MODE_OVERLAY);
         setContentView(R.layout.activity_chat);
         onGroupListener =null;
-
         // Record to the external cache directory for visibility
         mFileName = getCacheDir().getAbsolutePath();
         //mFileName += "/audiorecordtest.3gp";
@@ -345,10 +405,6 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    public void onUpdateMenu( OnGroupListener onGroupListener) {
-        this.onGroupListener =onGroupListener;
-    }
-
     private void loadMessagesFirebase(Chat chat) {
         Log.v(TAG, "Load Messages Firebase from " + chat.getId());
         mFirebaseDatabaseReference = DatabaseRefs.mMessagesDatabaseReference.child(chat.getId());
@@ -370,6 +426,10 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         });
         rvListMessage.setLayoutManager(mLinearLayoutManager);
         rvListMessage.setAdapter(firebaseAdapter);
+    }
+
+    public void onUpdateMenu( OnGroupListener onGroupListener) {
+        this.onGroupListener =onGroupListener;
     }
 
     private Chat createFirstChatNode() {
@@ -621,6 +681,94 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    private void invalidateTimer() {
+        mTimerRunnable = new Runnable() {
+            @Override
+            public void run() {
+                mTime.setText(getFormattedTime());
+                invalidateTimer();
+            }
+        };
+
+        mTime.postDelayed(mTimerRunnable, TIME_INVALIDATION_FREQUENCY);
+    }
+
+    private void stopTimer() {
+        if (mTimerRunnable != null) {
+            mTime.getHandler().removeCallbacks(mTimerRunnable);
+        }
+    }
+
+    private void cancelAllAnimations() {
+        if (mInputAnimator != null) {
+            mInputAnimator.cancel();
+        }
+
+        if (mSlideToCancelAnimator != null) {
+            mSlideToCancelAnimator.cancel();
+        }
+
+        if (mTimeAnimator != null) {
+            mTimeAnimator.cancel();
+        }
+    }
+
+    private String getFormattedTime() {
+        return mFormatter.format(new Date(System.currentTimeMillis() - mStartTime));
+    }
+
+    private void startRecording() {
+        mRecorder = new MediaRecorder();
+
+        mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+
+
+        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        mRecorder.setOutputFile(mFileName + "/" + mNameOfFile);
+        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+
+        try {
+            mRecorder.prepare();
+        } catch (IOException e) {
+            Log.e(TAG, "prepare() failed");
+        }
+
+        mRecorder.start();
+    }
+
+    private void stopRecording() {
+        try{
+            mRecorder.stop();
+            Toast.makeText(this, "Action submitted! Time " + getFormattedTime(), Toast.LENGTH_SHORT).show();
+            sendAudioFileMessageFirebase(mFileName + "/"+ mNameOfFile);
+        } catch (RuntimeException e){
+            Toast.makeText(getApplicationContext(),e.getMessage(),Toast.LENGTH_SHORT).show();
+        }
+        mRecorder.release();
+        mRecorder = null;
+    }
+
+    private void removeItemMessage(Message message){
+        for (Iterator<Message> iter = selectedMessages.listIterator(); iter.hasNext(); ) {
+            Message a = iter.next();
+            if (message.getId().equals(a.getId())) {
+                iter.remove();
+                break;
+            }
+        }
+    }
+
+    private void onRemoveGroup(){
+
+        onChatDataChanged.removeItemChat(true);
+    }
+
+    private void onAddMemberOnGroup(){
+
+
+        onChatDataChanged.addItemChat(true);
+    }
+
     private void bindViews() {
         action_toolbar = (Toolbar) findViewById(R.id.action_toolbar);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -683,7 +831,13 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                 // Your code to refresh the list here.
                 // Make sure you call swipeContainer.setRefreshing(false)
                 // once the network request has completed successfully.
+                if(mActionMode != null){
+                    mActionModeCallback.onDestroyActionMode(mActionMode);
+                    refreshLayout.setRefreshing(false);
+                    return;
+                }
                 if (chatID == null || chatID.isEmpty()) {
+                    refreshLayout.setRefreshing(false);
                     return;
                 }
                 if (Util.verifyNetworkConnection(ChatActivity.this)) {
@@ -744,6 +898,24 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         } else if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
                 sendLocationMessageFirebase(data);
+            }
+        }else if(requestCode == 1212){
+            if(resultCode == RESULT_OK){
+                String result=data.getStringExtra("chat_id");
+                for( Message message :selectedMessages){
+                    String key =DatabaseRefs.mMessagesDatabaseReference.child(result).push().getKey();
+                    message.setId(key);
+                    message.setSenderID(CurrentUser.getInstance().getUserModel().getId());
+                    DatabaseRefs.mMessagesDatabaseReference.child(result).child(key).setValue(message);
+                }
+                selectedMessages.clear();
+                mActionModeCallback.onDestroyActionMode(mActionMode);
+
+            }
+            if (resultCode == RESULT_CANCELED) {
+                //Write your code if there's no result
+                mActionModeCallback.onDestroyActionMode(mActionMode);
+
             }
         }
 
@@ -823,15 +995,6 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
         return true;
     }
-
-    void onRemoveGroup(){
-        onChatDataChanged.removeItemChat(true);
-    }
-
-    void onAddMemberOnGroup(){
-        onChatDataChanged.addItemChat(true);
-    }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -958,72 +1121,6 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         mSlideToCancel.setAlpha(1 - SLIDE_TO_CANCEL_ALPHA_MULTIPLIER * offset);
     }
 
-    private void invalidateTimer() {
-        mTimerRunnable = new Runnable() {
-            @Override
-            public void run() {
-                mTime.setText(getFormattedTime());
-                invalidateTimer();
-            }
-        };
-
-        mTime.postDelayed(mTimerRunnable, TIME_INVALIDATION_FREQUENCY);
-    }
-
-    private void stopTimer() {
-        if (mTimerRunnable != null) {
-            mTime.getHandler().removeCallbacks(mTimerRunnable);
-        }
-    }
-
-    private void cancelAllAnimations() {
-        if (mInputAnimator != null) {
-            mInputAnimator.cancel();
-        }
-
-        if (mSlideToCancelAnimator != null) {
-            mSlideToCancelAnimator.cancel();
-        }
-
-        if (mTimeAnimator != null) {
-            mTimeAnimator.cancel();
-        }
-    }
-
-    private String getFormattedTime() {
-        return mFormatter.format(new Date(System.currentTimeMillis() - mStartTime));
-    }
-
-    private void startRecording() {
-        mRecorder = new MediaRecorder();
-        mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-
-
-        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-        mRecorder.setOutputFile(mFileName + "/" + mNameOfFile);
-        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-
-        try {
-            mRecorder.prepare();
-        } catch (IOException e) {
-            Log.e(TAG, "prepare() failed");
-        }
-
-        mRecorder.start();
-    }
-
-    private void stopRecording() {
-        try{
-            mRecorder.stop();
-            Toast.makeText(this, "Action submitted! Time " + getFormattedTime(), Toast.LENGTH_SHORT).show();
-            sendAudioFileMessageFirebase(mFileName + "/"+ mNameOfFile);
-        } catch (RuntimeException e){
-            Toast.makeText(getApplicationContext(),e.getMessage(),Toast.LENGTH_SHORT).show();
-        }
-        mRecorder.release();
-        mRecorder = null;
-    }
-
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.d(TAG, "onConnectionFailed:" + connectionResult);
@@ -1066,71 +1163,36 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void longClickItemChat(View view, int postion, Message model, boolean isSelected) {
+        if(mActionMode == null){
+            mActionMode =startActionMode(mActionModeCallback);
+        }
 
-        action_toolbar.setVisibility(View.VISIBLE);
-        toolbar.setVisibility(View.GONE);
-        mSetSupportActionToolbar(action_toolbar);
-
-
-        toolbar.startActionMode(mActionModeCallback);
         if(isSelected){
             view.setBackground(getResources().getDrawable(R.drawable.shadow_item));
-        }else {
             selectedMessages.add(model);
-            notifCount.setText(String.valueOf(selectedMessages.size()));
+            notifCount.setText(""+selectedMessages.size());
+
             invalidateOptionsMenu();
+        }else {
+
+            removeItemMessage(model);
+            if(selectedMessages.size() ==0 ){
+
+                mActionModeCallback.onDestroyActionMode(mActionMode);
+            }
+            notifCount.setText(""+selectedMessages.size());
             view.setBackgroundColor(getResources().getColor(R.color.off_white));
         }
     }
 
-
-    interface OnGroupListener{
+    private interface OnGroupListener{
         Menu onGroupListener(Menu menu);
     }
 
-    interface OnChatDataChanged{
+
+    private interface OnChatDataChanged{
         void removeItemChat(boolean remove);
         void addItemChat(boolean add);
     }
-
-    private ActionMode.Callback mActionModeCallback =new ActionMode.Callback() {
-        @Override
-        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            // Inflate a menu resource providing context menu items
-            MenuInflater inflater = mode.getMenuInflater();
-            inflater.inflate(R.menu.menu_multi_select, menu);
-            View count = menu.findItem(R.id.action_select).getActionView();
-            notifCount = (Button) count.findViewById(R.id.notif_count);
-
-            context_menu = menu;
-            return true;
-        }
-
-
-
-        @Override
-        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-            return false; // Return false if nothing is done
-        }
-
-        @Override
-        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.action_trash:
-                    //alertDialogHelper.showAlertDialog("","Delete Contact","DELETE","CANCEL",1,false);
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
-        @Override
-        public void onDestroyActionMode(ActionMode mode) {
-            selectedMessages.clear();
-            //Toast.makeText(getApplicationContext(),"Destory",Toast.LENGTH_SHORT).show();
-            mActionMode = null;
-        }
-    };
-
 
 }

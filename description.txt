@@ -1,0 +1,33 @@
+
+Live chat between multiple devices    OK
+Group chat functionality                                         
+Private chat functionality                                        
+Login with Email                                                       
+Sending text messages                                            
+Sending pictures                                                       
+Sending videos                                                         
+Sending audio messages                             
+Sending current location                                         
+Sending emojis
+Sync with contacts & firebase         
+Load earlier messages                                             
+Typing indicator
+On-screen audio recording                         
+Save picture messages to device
+Save video messages to device
+Delete messages
+Realtime conversation view for ongoing chats  
+All media view for chat media files                                    
+Map view for shared locations                                                       
+Group details view for groups
+Wallpaper backgrounds for Chat view
+Picture, video and audio upload progress indicator
+Video length limit possibility                                              
+Copy and paste text messages                                           
+Arbitrary message sizes                                                                  
+27.   Send/Receive sound effects
+Report to admin
+Online user
+Favorite massage
+Search in massage and user      
+Delete conversation
